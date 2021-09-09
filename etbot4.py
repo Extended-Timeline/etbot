@@ -393,4 +393,4 @@ async def on_message(message):
 
 
 
-client.run('ODY3NzM0Njk3MjM1ODQxMTA0.YPla6Q.BIXDpwV8rpudPwcbiL_0kOEqeAo')
+client.run('')
