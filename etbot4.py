@@ -23,12 +23,14 @@ abstain_vote = '<:Abstain:867869367601070081>'
 
 @client.event
 async def on_ready():
+    # setting global variables on launch
     global senatorial_voting
     senatorial_voting = client.get_channel(867857838142783529)
     global senate
     senate = client.get_channel(867738868181368855)
     global staff_bot_commands
     staff_bot_commands = client.get_channel(885604958609756190)
+
     print('Anwesend {}'.format(client.user.name))
 
 
@@ -357,31 +359,31 @@ async def on_message(message):
 
     # in #senatorial-voting or in #senate and &edit
     if (message.channel.id == senatorial_voting.id or (
-            message.channel == senate and message.content.lower.startswith('&edit')) or
+            message.channel == senate and message.content.lower().startswith('&edit')) or
             message.channel == staff_bot_commands):
 
         # bill scenario
-        if message.content.lower.startswith('&bill '):
+        if message.content.lower().startswith('&bill '):
             await make_bill(message)
 
         # edit bill
-        if message.content.lower.startswith('&edit '):
+        if message.content.lower().startswith('&edit '):
             await edit(message)
 
         # option scenario
-        if message.content.lower.startswith('&option '):
+        if message.content.lower().startswith('&option '):
             await make_option(message)
 
         # amendment scenario
-        if message.content.lower.startswith('&amendment '):
+        if message.content.lower().startswith('&amendment '):
             await make_amendment(message)
 
         # amendment option
-        if message.content.lower.startswith('&amendmentoption '):
+        if message.content.lower().startswith('&amendmentoption '):
             await make_amendmentoption(message)
 
         # edit command numbers
-        if message.content.lower.startswith('&index '):
+        if message.content.lower().startswith('&index '):
             await set_index(message)
 
 
