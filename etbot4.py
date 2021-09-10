@@ -108,6 +108,9 @@ def to_int(string):
     for c in string:
         if is_number(c):
             number += c
+
+    if number == '':
+        return number
     return int(number)
 
 
@@ -145,10 +148,9 @@ async def make_amendment(command):
 
     args = text.split(' ')
 
-    if is_number(args[1]):
-        billnumber = int(args[1])  # get index
-    else:
-        await command.channel.send('No valid bill number was given' + author)
+    billnumber = to_int(args[1])  # get index
+    if billnumber == '':
+        await command.channel.send('No valid bill number was given ' + author)
         return
 
     if not is_number(billnumber):
@@ -185,10 +187,9 @@ async def edit(command):
     text = command.content
     author = command.author.mention
 
-    args = text.split(' ')
-    if is_number(args[1]):
-        index = int(args[1])  # get index
-    else:
+    args = text.split(' ')  # TODO fix two spaces resulting in empty strings
+    index = to_int(args[1])  # get index
+    if index == '':
         await command.channel.send('No valid bill number was given' + author)
         return
     isamendment = False
@@ -281,9 +282,8 @@ async def make_amendmentoption(command):
     # variable set up
     args = text.split(' ')
 
-    if is_number(args[1]):
-        billnumber = int(args[1])  # get index
-    else:
+    billnumber = to_int(args[1])  # get index
+    if billnumber == '':
         await command.channel.send('No valid bill number was given' + author)
         return
 
