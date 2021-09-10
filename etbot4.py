@@ -144,7 +144,13 @@ async def make_amendment(command):
     author = command.author.mention  # get author
 
     args = text.split(' ')
-    billnumber = args[1]  # get command number
+
+    if is_number(args[1]):
+        billnumber = int(args[1])  # get index
+    else:
+        await command.channel.send('No valid bill number was given' + author)
+        return
+
     if not is_number(billnumber):
         print(billnumber, '1')
         return
@@ -274,7 +280,13 @@ async def make_amendmentoption(command):
 
     # variable set up
     args = text.split(' ')
-    billnumber = args[1]  # get bill number
+
+    if is_number(args[1]):
+        billnumber = int(args[1])  # get index
+    else:
+        await command.channel.send('No valid bill number was given' + author)
+        return
+
     if not is_number(billnumber):
         return
     billnumber = int(billnumber)
