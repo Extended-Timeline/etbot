@@ -189,7 +189,6 @@ async def edit(command):
 
     # search bill by index TODO check if bill has been concluded before editing
     messages = await senatorial_voting.history(limit=40).flatten()
-    y = -1
     original = changes = billauthor = billnumber = ''  # initialize variables
     for i, message in enumerate(messages):
         content = message.content.split(' ')
@@ -202,11 +201,12 @@ async def edit(command):
                     billnumber = content[5]
                     billnumber = billnumber.strip('*')
                     isamendment = True
-                    break
-            else:
-                await command.channel.send(
-                    'Either no bill with that index in the last 40 messages or other invalid input.' + author)
-                return
+                break
+
+    if original == '':
+        await command.channel.send(
+            'Either no bill with that index in the last 40 messages or other invalid input.' + author)
+        return
 
     # clean changes
     changes = changes[:len(changes) - 4]
