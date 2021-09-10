@@ -34,11 +34,12 @@ async def on_ready():
     print('Anwesend {}'.format(client.user.name))
 
 
+# checks if the author is *not* the bot himself
 def is_not_me(m):
     return not m.author == client.user
 
 
-# increase index by 1 + save
+# returns the index
 def get_index():
     text = open('index.txt', 'r')
     number = text.read()
@@ -47,7 +48,7 @@ def get_index():
     return number
 
 
-# increase index by 1
+# increases index by 1
 def increase_index():
     file = open('index.txt', 'r')
     index = int(file.read())
@@ -58,27 +59,29 @@ def increase_index():
 
 
 # cleans first x characters (command)
-def remove_command(nachricht, amount):
-    nachrichtnew = ''
-    for x in range(len(nachricht)):
-        if x > amount:
-            nachrichtnew = nachrichtnew + nachricht[x]
-    return nachrichtnew
+def remove_command(message, amount):
+    result = ''
+    for i, c in enumerate(message):
+        if i > amount:
+            result += c
+    return result
 
 
-def bill_start(nachricht, nummer):
-    nachricht = '**Bill ' + str(nummer) + ':** ' + '\r\n' + nachricht + ' '
-    return nachricht
+def assemble_bill(message, number, author):
+    message = '**Bill ' + str(number) + ':** ' + '\r\n' + message + ' '
+    message += '\r\n' + 'Bill by: ' + author + ' '
+    message += '\r\n' + senator
+    return message
 
 
-# assembles the command end
-def message_end(nachricht, author):
-    nachricht = nachricht + '\r\n' + 'Bill by: ' + author + ' '
-    nachricht = nachricht + '\r\n' + senator
-    return nachricht
+def assemble_amendment(message, index, billnumber, author):
+    message = '**Bill ' + index + ':** Amendment to **Bill ' + billnumber + '** ' + '\r\n' + message + ' '
+    message += '\r\n' + 'Bill by: ' + author + ' '
+    message += '\r\n' + senator
+    return message
 
 
-# checks if str is digit
+# checks if string is digit
 def is_number(string):
     string = str(string)
     for char in string:
@@ -87,34 +90,42 @@ def is_number(string):
     return True
 
 
-# remove leading digits (all digits until no more
-def clean_digits(nachricht):
+# remove leading digits (all digits until a character is not a number)
+def clean_digits(text):
     check = False
     cleantext = ''
-    for char in nachricht:
+    for char in text:
         if not is_number(char) or check is True:
             if check:
-                cleantext = cleantext + char
+                cleantext += char
             check = True
     return cleantext
+
+
+# removes everything but numbers from a string and converts it to an integer
+def to_int(string):
+    number = ''
+    for c in string:
+        if is_number(c):
+            number += c
+    return int(number)
 
 
 # takes the whole command/message as input and assembles and sends the bill
 async def make_bill(command):
     # variable set up
-    nachricht = command.content  # get command
+    text = command.content  # get command
     author = command.author.mention  # get author
 
     # deletes bill command
     await command.channel.purge(limit=1, check=is_not_me)
 
     # assemble new bill
-    nachricht = remove_command(nachricht, 5)
-    nachricht = bill_start(nachricht, get_index())
-    nachricht = message_end(nachricht, author)
+    text = remove_command(text, 5)
+    text = assemble_bill(text, get_index(), author)
 
     # send bill
-    message = await senatorial_voting.send(nachricht)
+    message = await senatorial_voting.send(text)
     increase_index()
 
     # add reactions
@@ -125,15 +136,14 @@ async def make_bill(command):
 
 # takes the whole command/message as input and assembles and sends the amendment
 async def make_amendment(command):
-    # variable set up
-    nachricht = command.content  # get command
-    author = command.author.mention  # get author
-
     # deletes command command
     await command.channel.purge(limit=1, check=is_not_me)
 
     # variable set up
-    args = nachricht.split(' ')
+    text = command.content  # get command
+    author = command.author.mention  # get author
+
+    args = text.split(' ')
     billnumber = args[1]  # get command number
     if not is_number(billnumber):
         print(billnumber, '1')
@@ -142,40 +152,99 @@ async def make_amendment(command):
     number = get_index()
 
     # assemble new message
-    nachricht = remove_command(nachricht, 10)
-    nachricht = clean_digits(nachricht)
-    nachricht = '**Bill ' + str(number) + ':** Amendment to **Bill ' + str(
-        billnumber) + '** ' + '\r\n' + nachricht + ' '
-    nachricht = message_end(nachricht, author)
+    text = remove_command(text, 10)
+    text = clean_digits(text)
+    text = assemble_amendment(text, number, billnumber, author)
 
     # errors
-    text = open('index.txt', 'r')
-    check = int(text.read())
-    text.close()
-    if check < billnumber:
+    file = open('index.txt', 'r')
+    index = int(file.read())
+    file.close()
+    if index < billnumber:
         await senate.send('You can\'t amend a non-existent bill.' + author)
         return
 
     # send command
-    nachricht = await senatorial_voting.send(nachricht)
+    message = await senatorial_voting.send(text)
     increase_index()
 
     # add reactions
-    await nachricht.add_reaction(yes_vote)
-    await nachricht.add_reaction(no_vote)
-    await nachricht.add_reaction(abstain_vote)
+    await message.add_reaction(yes_vote)
+    await message.add_reaction(no_vote)
+    await message.add_reaction(abstain_vote)
+
+
+async def edit(command):
+    # variable set up
+    text = command.content
+    author = command.author.mention
+
+    args = text.split(' ')
+    index = int(args[1])  # get index
+    isamendment = False
+
+    # clean command + digit
+    text = remove_command(text, 5)
+    text = clean_digits(text)
+
+    # search bill by index TODO check if bill has been concluded before editing
+    messages = await senatorial_voting.history(limit=40).flatten()
+    y = -1
+    original = changes = billauthor = billnumber = ''  # initialize variables
+    for i, message in enumerate(messages):
+        content = message.content.split(' ')
+        if len(content) > 1:
+            if to_int(content[1]) == index and message.author == client.user:
+                original = message
+                changes = content
+                billauthor = content[len(content) - 2]
+                if content[2] == 'Amendment' and content[3] == 'to':
+                    billnumber = content[5]
+                    billnumber = billnumber.strip('*')
+                    isamendment = True
+                    break
+            else:
+                await command.channel.send(
+                    'Either no bill with that index in the last 40 messages or other invalid input.' + author)
+                return
+
+    # clean changes
+    changes = changes[:len(changes) - 4]
+    changestemp = ''
+    for element in changes:
+        changestemp = changestemp + element + ' '
+    changes = changestemp
+
+    # error messages
+    if not author == billauthor:
+        await command.channel.send('This is not your Bill. ' + author)
+        return
+
+    # assemble new message
+    if isamendment:
+        content = assemble_amendment(text, index, billnumber, author)
+    else:
+        content = assemble_bill(text, index, author)
+
+    # edit command
+    if original != '':
+        await original.edit(content=content)
+        await senate.send(
+            'Previous wording: ' + '\r\n' + '```' + changes + '```' + '\r\n' + 'Success. ' + author)
+    else:
+        await senate.send('A bug seems to have crept itself into the code.')
 
 
 async def make_option(command):
     # variable set up
-    nachricht = command.content  # get command
+    text = command.content  # get bill
     author = command.author.mention  # get author
 
     # deletes command message
     await command.channel.purge(limit=1, check=is_not_me)
 
     # variable set up
-    args = nachricht.split(' ')
+    args = text.split(' ')
     amount = args[1]  # get number
     if not is_number(amount):
         return
@@ -183,26 +252,25 @@ async def make_option(command):
     number = get_index()
 
     # assemble new bill
-    nachricht = remove_command(nachricht, 7)
-    nachricht = clean_digits(nachricht)
-    nachricht = bill_start(nachricht, number)
-    nachricht = message_end(nachricht, author)
+    text = remove_command(text, 7)
+    text = clean_digits(text)
+    text = assemble_bill(text, number, author)
 
     # send option
-    await send_option(nachricht, senatorial_voting, amount)
+    await send_option(text, senatorial_voting, amount)
 
 
 async def make_amendmentoption(command):
     # variable set up
-    nachricht = command.content  # get command
+    text = command.content  # get bill
     author = command.author.mention  # get author
 
-    # deletes command command
+    # deletes command message
     await command.channel.purge(limit=1, check=is_not_me)
 
     # variable set up
-    args = nachricht.split(' ')
-    billnumber = args[1]  # get command number
+    args = text.split(' ')
+    billnumber = args[1]  # get bill number
     if not is_number(billnumber):
         return
     billnumber = int(billnumber)
@@ -213,139 +281,74 @@ async def make_amendmentoption(command):
     number = get_index()
 
     # assemble new amendment
-    nachricht = remove_command(nachricht, 16)
-    nachricht = clean_digits(nachricht)
-    nachricht = '**Bill ' + str(number) + ':** Amendment to **Bill ' + str(
-        billnumber) + '** ' + '\r\n' + nachricht + ' '
-    nachricht = message_end(nachricht, author)
+    text = remove_command(text, 16)
+    text = clean_digits(text)
+    text = assemble_bill(text, number, author)
 
     # errors
-    text = open('index.txt', 'r')
-    check = int(text.read())
-    text.close()
-    if check < billnumber:
+    file = open('index.txt', 'r')
+    index = int(file.read())
+    file.close()
+    if index < billnumber:
         await senate.send('You can\'t amend a non-existent bill.' + author)
         return
 
     # send option
-    await send_option(nachricht, senatorial_voting, amount)
+    await send_option(text, senatorial_voting, amount)
 
 
-async def send_option(nachricht, channel, amount):
+async def send_option(text, channel, amount):
     # send amendment
-    nachricht = await channel.send(nachricht)
+    text = await channel.send(text)
     increase_index()
 
     # add reactions
     if amount < 2:
-        await nachricht.add_reaction('1️⃣')
-        await nachricht.add_reaction('2️⃣')
+        await text.add_reaction('1️⃣')
+        await text.add_reaction('2️⃣')
     elif amount == 3:
-        await nachricht.add_reaction('1️⃣')
-        await nachricht.add_reaction('2️⃣')
-        await nachricht.add_reaction('3️⃣')
+        await text.add_reaction('1️⃣')
+        await text.add_reaction('2️⃣')
+        await text.add_reaction('3️⃣')
     elif amount == 4:
-        await nachricht.add_reaction('1️⃣')
-        await nachricht.add_reaction('2️⃣')
-        await nachricht.add_reaction('3️⃣')
-        await nachricht.add_reaction('4️⃣')
+        await text.add_reaction('1️⃣')
+        await text.add_reaction('2️⃣')
+        await text.add_reaction('3️⃣')
+        await text.add_reaction('4️⃣')
     elif amount == 5:
-        await nachricht.add_reaction('1️⃣')
-        await nachricht.add_reaction('2️⃣')
-        await nachricht.add_reaction('3️⃣')
-        await nachricht.add_reaction('4️⃣')
-        await nachricht.add_reaction('5️⃣')
+        await text.add_reaction('1️⃣')
+        await text.add_reaction('2️⃣')
+        await text.add_reaction('3️⃣')
+        await text.add_reaction('4️⃣')
+        await text.add_reaction('5️⃣')
     elif amount > 5:
-        await nachricht.add_reaction('1️⃣')
-        await nachricht.add_reaction('2️⃣')
-        await nachricht.add_reaction('3️⃣')
-        await nachricht.add_reaction('4️⃣')
-        await nachricht.add_reaction('5️⃣')
-        await nachricht.add_reaction('6️⃣')
+        await text.add_reaction('1️⃣')
+        await text.add_reaction('2️⃣')
+        await text.add_reaction('3️⃣')
+        await text.add_reaction('4️⃣')
+        await text.add_reaction('5️⃣')
+        await text.add_reaction('6️⃣')
 
-    await nachricht.add_reaction(no_vote)
-    await nachricht.add_reaction(abstain_vote)
-
-
-async def edit(command):
-    # variable set up
-    nachricht = command.content  # get command
-    author = command.author.mention  # get author
-
-    # variable set up
-    args = nachricht.split(' ')
-    index = str(args[1])  # get index
-    isamendment = False
-
-    # clean command + digit
-    nachricht = remove_command(nachricht, 5)
-    nachricht = clean_digits(nachricht)
-
-    # search bill by index
-    channelhistory = client.get_channel(senatorial_voting.id)  # replace
-    messages = await channelhistory.history(limit=40).flatten()
-    y = -1
-    for x in range(len(messages)):
-        message2 = messages[x].content.split(' ')
-        if len(message2) > 1:
-            message1 = message2[1]  # TODO make to_number() function
-            message1 = message1.strip('*')
-            message1 = message1.strip(':')
-            if str(message1) == index and messages[x].author == client.user:
-                y = x
-                if message2[2] == 'Amendment' and message2[3] == 'to':
-                    billnumber = message2[5]
-                    billnumber = billnumber.strip('*')
-                    isamendment = True
-                changes = message2
-                authorbill = message2[len(message2) - 2]
-
-    # clean changes
-    changes = changes[:len(changes) - 4]
-    changestemp = ''
-    for element in changes:
-        changestemp = changestemp + element + ' '
-    changes = changestemp
-
-    # error messages
-    if y == -1:
-        await command.channel.send(
-            'Either no command with that index in the last 40 messages or other invalid input.' + author)
-        return
-    if not author == authorbill:
-        await command.channel.send('This is not your Bill. ' + author)
-        return
-
-    # assamble new command
-    if isamendment:
-        nachricht = '**Bill ' + str(index) + ':** Amendment to **Bill ' + str(
-            billnumber) + '** ' + '\r\n' + nachricht + ' '
-    else:
-        nachricht = bill_start(nachricht, index)
-    nachricht = message_end(nachricht, author)
-
-    # edit command
-    await messages[y].edit(content=nachricht)
-    await senate.send(
-        'Original wording: ' + '\r\n' + '```' + changes + '```' + '\r\n' + 'Success. ' + author)
+    await text.add_reaction(no_vote)
+    await text.add_reaction(abstain_vote)
 
 
 async def set_index(command):
     # variable set up
-    nachricht = command.content  # get command
+    text = command.content  # get command
     author = command.author.mention  # get author
 
     # variable set up
-    args = nachricht.split(' ')
+    args = text.split(' ')
     indexnew = args[1]  # get newindex
     if not is_number(indexnew):
         await senate.send('That\'s not a number. ' + author)
         return
 
     # edit index
-    text = open('index.txt', 'w')
-    text.write(str(int(indexnew) - 1))
-    text.close()
+    file = open('index.txt', 'w')
+    file.write(str(int(indexnew) - 1))
+    file.close()
 
     # response
     await senate.send('Success, the next bill number will be: ' + indexnew + '. ' + author)
@@ -366,6 +369,10 @@ async def on_message(message):
         if message.content.lower().startswith('&bill '):
             await make_bill(message)
 
+        # amendment scenario
+        if message.content.lower().startswith('&amendment '):
+            await make_amendment(message)
+
         # edit bill
         if message.content.lower().startswith('&edit '):
             await edit(message)
@@ -373,10 +380,6 @@ async def on_message(message):
         # option scenario
         if message.content.lower().startswith('&option '):
             await make_option(message)
-
-        # amendment scenario
-        if message.content.lower().startswith('&amendment '):
-            await make_amendment(message)
 
         # amendment option
         if message.content.lower().startswith('&amendmentoption '):
