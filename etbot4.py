@@ -351,36 +351,31 @@ async def on_message(message):
 
     # in #senatorial-voting or in #senate and &edit
     if (message.channel.id == senatorial_voting.id or (
-            message.channel == senate and (message.content.startswith('&edit') or
-                                           message.content.startswith('&Edit'))) or
+            message.channel == senate and message.content.lower.startswith('&edit')) or
             message.channel == staff_bot_commands):
 
-        # variable set up
-        nachricht = message.content  # get bill
-        author = message.author.mention  # get author
-
         # bill scenario
-        if message.content.startswith('&bill ') or message.content.startswith('&Bill '):
+        if message.content.lower.startswith('&bill '):
             await make_bill(message)
 
         # edit bill
-        if message.content.startswith('&edit ') or message.content.startswith('&Edit '):
+        if message.content.lower.startswith('&edit '):
             await edit(message)
 
         # option scenario
-        if message.content.startswith('&option ') or message.content.startswith('&Option '):
+        if message.content.lower.startswith('&option '):
             await make_option(message)
 
         # amendment scenario
-        if message.content.startswith('&amendment ') or message.content.startswith('&Amendment '):
+        if message.content.lower.startswith('&amendment '):
             await make_amendment(message)
 
         # amendment option
-        if message.content.startswith('&amendmentoption ') or message.content.startswith('&Amendmentoption '):
+        if message.content.lower.startswith('&amendmentoption '):
             await make_amendmentoption(message)
 
         # edit command numbers
-        if message.content.startswith('&index ') or message.content.startswith('&Index '):
+        if message.content.lower.startswith('&index '):
             await set_index(message)
 
 
