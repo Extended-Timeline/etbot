@@ -75,9 +75,9 @@ def assemble_bill(message, number, author):
 
 
 def assemble_amendment(message, index, billnumber, author):
-    message = '**Bill ' + index + ':** Amendment to **Bill ' + billnumber + '** ' + '\r\n' + message + ' '
-    message += '\r\n' + 'Bill by: ' + author + ' '
-    message += '\r\n' + senator
+    message = '**Bill ' + str(index) + ':** Amendment to **Bill ' + str(billnumber) + '** ' + '\r\n' + str(message)
+    message += '\r\n' + 'Bill by: ' + str(author) + ' '
+    message += '\r\n' + str(senator)
     return message
 
 
@@ -180,7 +180,11 @@ async def edit(command):
     author = command.author.mention
 
     args = text.split(' ')
-    index = int(args[1])  # get index
+    if is_number(args[1]):
+        index = int(args[1])  # get index
+    else:
+        await command.channel.send('No valid bill number was given' + author)
+        return
     isamendment = False
 
     # clean command + digit
@@ -283,7 +287,7 @@ async def make_amendmentoption(command):
     # assemble new amendment
     text = remove_command(text, 16)
     text = clean_digits(text)
-    text = assemble_bill(text, number, author)
+    text = assemble_amendment(text, number, billnumber, author)
 
     # errors
     file = open('index.txt', 'r')
