@@ -13,9 +13,9 @@ client = discord.Client()
 
 # Testing IDs
 senator = '<@&867863600973742121>'
-senatorial_voting = client.get_channel(867857838142783529)  # is now the channel itself, not it's ID.
-senate = client.get_channel(867738868181368855)  # to get the ID just use senate.id
-staff_bot_commands = client.get_channel(885604958609756190)
+global senatorial_voting  # is now the channel itself, not it's ID.
+global senate  # to get the ID just use senate.id
+global staff_bot_commands
 yes_vote = '<:Yes:867869297329176587>'
 no_vote = '<:No:867869349041799198>'
 abstain_vote = '<:Abstain:867869367601070081>'
@@ -23,6 +23,12 @@ abstain_vote = '<:Abstain:867869367601070081>'
 
 @client.event
 async def on_ready():
+    global senatorial_voting
+    senatorial_voting = client.get_channel(867857838142783529)
+    global senate
+    senate = client.get_channel(867738868181368855)
+    global staff_bot_commands
+    staff_bot_commands = client.get_channel(885604958609756190)
     print('Anwesend {}'.format(client.user.name))
 
 
