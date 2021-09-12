@@ -3,33 +3,34 @@ import discord
 client = discord.Client()
 
 # ET Server IDs
-# senator = '<@&691576535781605417>'
-# senatorial_voting = client.get_channel(698212804808671294)
-# senate = client.get_channel(694963794757156952)
-# staff_bot_commands = client.get_channel(498634929064771605)
-# yes_vote = '<:Yes:698226023795261451>'
-# no_vote = '<:No:698226052899799130>'
-# abstain_vote = '<:Abstain:698226077113516118>'
+senator = '<@&691576535781605417>'
+global senatorial_voting  # 698212804808671294
+global senate  # 694963794757156952
+global staff_bot_commands  # 498634929064771605
+yes_vote = '<:Yes:698226023795261451>'
+no_vote = '<:No:698226052899799130>'
+abstain_vote = '<:Abstain:698226077113516118>'
+
 
 # Testing IDs
-senator = '<@&867863600973742121>'
-global senatorial_voting  # is now the channel itself, not it's ID.
-global senate  # to get the ID just use senate.id
-global staff_bot_commands
-yes_vote = '<:Yes:867869297329176587>'
-no_vote = '<:No:867869349041799198>'
-abstain_vote = '<:Abstain:867869367601070081>'
+# senator = '<@&867863600973742121>'
+# global senatorial_voting  # 867857838142783529
+# global senate  # 867738868181368855
+# global staff_bot_commands  # 885604958609756190
+# yes_vote = '<:Yes:867869297329176587>'
+# no_vote = '<:No:867869349041799198>'
+# abstain_vote = '<:Abstain:867869367601070081>'
 
 
 @client.event
 async def on_ready():
     # setting global variables on launch
     global senatorial_voting
-    senatorial_voting = client.get_channel(867857838142783529)
+    senatorial_voting = client.get_channel(698212804808671294)
     global senate
-    senate = client.get_channel(867738868181368855)
+    senate = client.get_channel(694963794757156952)
     global staff_bot_commands
-    staff_bot_commands = client.get_channel(885604958609756190)
+    staff_bot_commands = client.get_channel(498634929064771605)
 
     print('Anwesend {}'.format(client.user.name))
 
