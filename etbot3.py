@@ -400,7 +400,7 @@ async def on_message(message):
     # in #senatorial-voting or in #senate and &edit
     if (message.channel == channels["senatorial_voting"] or (
             message.channel == channels["senate"] and message.content.lower().startswith('&edit')) or
-            message.channel == channels["staff_bot_commands"] or message.channel == channels["memes"]):
+            message.channel == channels["staff_bot_commands"]):
 
         # bill scenario
         if message.content.lower().startswith('&bill '):
@@ -426,9 +426,9 @@ async def on_message(message):
         if message.content.lower().startswith('&index '):
             await set_index(message)
 
-        # meme voting
-        if message.channel == channels["memes"]:
-            await meme_voting(message)
+    # meme voting
+    if message.channel == channels["memes"]:
+        await meme_voting(message)
 
 
 client.run('Nzc3ODY3NDAxNTQyMTA3MTQ4.X7JreA.RhAvIT0kp-BAB30SsduZh1wipT8')
