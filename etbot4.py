@@ -378,7 +378,7 @@ async def on_message(message):
         return
 
     # in #senatorial-voting or in #senate and &edit
-    if (message.channel.id == senatorial_voting.id or (
+    if (message.channel == senatorial_voting or (
             message.channel == senate and message.content.lower().startswith('&edit')) or
             message.channel == staff_bot_commands):
 
