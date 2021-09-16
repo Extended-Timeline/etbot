@@ -20,11 +20,21 @@ global staff_bot_commands  # 885604958609756190
 yes_vote = '<:Yes:867869297329176587>'
 no_vote = '<:No:867869349041799198>'
 abstain_vote = '<:Abstain:867869367601070081>'
+recycle = '♻️'
+ear_with_hearing_aid = '🦻'
+global channels
 
 
 @client.event
 async def on_ready():
     # setting global variables on launch
+    global channels
+    channels = {
+        "senate": client.get_channel(694963794757156952),
+        "senatorial_voting": client.get_channel(698212804808671294),
+        "staff_bot_commands": client.get_channel(498634929064771605),
+        "memes": client.get_channel(888136237146337280)
+    }
     global senatorial_voting
     senatorial_voting = client.get_channel(867857838142783529)
     global senate
@@ -371,6 +381,16 @@ async def set_index(command):
     await senate.send('Success, the next bill number will be: ' + indexnew + '. ' + author)
 
 
+async def meme_voting(message):
+    if len(message.embeds) < 1:
+        return
+
+    await message.add_reaction(yes_vote)
+    await message.add_reaction(no_vote)
+    await message.add_reaction(recycle)
+    await message.add_reaction(ear_with_hearing_aid)
+
+
 @client.event
 async def on_message(message):
     # no reaction if bot
@@ -378,9 +398,9 @@ async def on_message(message):
         return
 
     # in #senatorial-voting or in #senate and &edit
-    if (message.channel.id == senatorial_voting.id or (
-            message.channel == senate and message.content.lower().startswith('&edit')) or
-            message.channel == staff_bot_commands):
+    if (message.channel == channels["senatorial_voting"] or (
+            message.channel == channels["senate"] and message.content.lower().startswith('&edit')) or
+            message.channel == channels["staff_bot_commands"] or message.channel == channels["memes"]):
 
         # bill scenario
         if message.content.lower().startswith('&bill '):
@@ -405,6 +425,10 @@ async def on_message(message):
         # edit command numbers
         if message.content.lower().startswith('&index '):
             await set_index(message)
+
+        # meme voting
+        if message.channel == channels["memes"]:
+            await meme_voting(message)
 
 
 client.run('Nzc3ODY3NDAxNTQyMTA3MTQ4.X7JreA.RhAvIT0kp-BAB30SsduZh1wipT8')
