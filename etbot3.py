@@ -23,6 +23,7 @@ abstain_vote = '<:Abstain:867869367601070081>'
 recycle = '♻️'
 ear_with_hearing_aid = '🦻'
 global channels
+global commands
 
 
 @client.event
@@ -34,6 +35,26 @@ async def on_ready():
         "senatorial_voting": client.get_channel(698212804808671294),
         "staff_bot_commands": client.get_channel(498634929064771605),
         "memes": client.get_channel(888136237146337280)
+    }
+    global commands
+    commands = {
+        "&bill": [channels["senatorial_voting"],
+                  channels["staff_bot_commands"]],
+
+        "&amendment": [channels["senatorial_voting"],
+                       channels["staff_bot_commands"]],
+
+        "&edit": [channels["senate"],
+                  channels["senatorial_voting"],
+                  channels["staff_bot_commands"]],
+
+        "&option": [channels["senatorial_voting"],
+                    channels["staff_bot_commands"]],
+
+        "&amendmentoption": [channels["senatorial_voting"],
+                             channels["staff_bot_commands"]],
+
+        "&index": [channels["staff_bot_commands"]]
     }
     global senatorial_voting
     senatorial_voting = client.get_channel(867857838142783529)
