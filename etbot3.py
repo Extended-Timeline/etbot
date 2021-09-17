@@ -1,6 +1,7 @@
 import discord
+from discord.ext import commands
 
-client = discord.Client()
+bot = commands.Bot(command_prefix='&')
 
 # ET Server IDs
 # senator = '<@&691576535781605417>'
@@ -25,66 +26,36 @@ ear_with_hearing_aid = '🦻'
 global channels
 
 
-@client.event
+@bot.event
 async def on_ready():
     # setting global variables on launch
     global channels
     channels = {
-        "senate": client.get_channel(694963794757156952),
-        "senatorial_voting": client.get_channel(698212804808671294),
-        "staff_bot_commands": client.get_channel(498634929064771605),
-        "memes": client.get_channel(888136237146337280)
-    }
-    global commands
-    commands = {
-        "&bill": [channels["senatorial_voting"],
-                  channels["staff_bot_commands"]],
-
-        "&amendment": [channels["senatorial_voting"],
-                       channels["staff_bot_commands"]],
-
-        "&edit": [channels["senate"],
-                  channels["senatorial_voting"],
-                  channels["staff_bot_commands"]],
-
-        "&option": [channels["senatorial_voting"],
-                    channels["staff_bot_commands"]],
-
-        "&amendmentoption": [channels["senatorial_voting"],
-                             channels["staff_bot_commands"]],
-
-        "&index": [channels["staff_bot_commands"]]
+        "senate": bot.get_channel(694963794757156952),
+        "senatorial_voting": bot.get_channel(698212804808671294),
+        "staff_bot_commands": bot.get_channel(498634929064771605),
+        "memes": bot.get_channel(888136237146337280)
     }
     global senatorial_voting
-    senatorial_voting = client.get_channel(867857838142783529)
+    senatorial_voting = bot.get_channel(867857838142783529)
     global senate
-    senate = client.get_channel(867738868181368855)
+    senate = bot.get_channel(867738868181368855)
     global staff_bot_commands
-    staff_bot_commands = client.get_channel(885604958609756190)
+    staff_bot_commands = bot.get_channel(885604958609756190)
 
-    print('Anwesend {}'.format(client.user.name))
+    print('Anwesend {}'.format(bot.user.name))
 
 
 # checks if the author is *not* the bot himself
 def is_not_me(m):
-    return not m.author == client.user
+    return not m.author == bot.user
 
 
 # returns the index of the last bill
-async def get_index():
+async def get_last_billnumber():  # TODO use something else (database?) to store the current index
     history = await senatorial_voting.history().flatten()
-    message = discord.utils.find(lambda m: m.content.startswith('**Bill'), history)
+    message = discord.utils.find(lambda m: m.content.startswith('**Bill '), history)
     return to_int(message.content.split(' ')[1])
-
-
-# increases index by 1
-def increase_index():
-    file = open('index.txt', 'r')
-    index = int(file.read())
-    file.close()
-    file = open('index.txt', 'w')
-    file.write(str(index + 1))
-    file.close()
 
 
 # cleans first x characters (command)
@@ -96,11 +67,11 @@ def remove_command(message, amount):
     return result
 
 
-def assemble_bill(message, number, author):
-    message = '**Bill ' + str(number) + ':** ' + '\r\n' + message + ' '
-    message += '\r\n' + 'Bill by: ' + author + ' '
-    message += '\r\n' + senator
-    return message
+def assemble_bill(text, number: int, author):
+    text = '**Bill ' + str(number) + ':** ' + '\r\n' + text + ' '
+    text += '\r\n' + 'Bill by: ' + author + ' '
+    text += '\r\n' + senator
+    return text
 
 
 def assemble_amendment(message, index, billnumber, author):
@@ -113,6 +84,8 @@ def assemble_amendment(message, index, billnumber, author):
 # checks if string is digit
 def is_number(string):
     string = str(string)
+    if not string:
+        return False
     for char in string:
         if char not in '0123456789':
             return False
@@ -139,26 +112,23 @@ def to_int(string):
             number += c
 
     if number == '':
-        return number
+        return None
     return int(number)
 
 
 # takes the whole command/message as input and assembles and sends the bill
-async def make_bill(command):
-    # variable set up
-    text = command.content  # get command
-    author = command.author.mention  # get author
+@bot.command(name='bill',
+             rest_is_raw=True)
+async def make_bill(context, *, text):  # TODO strip the leading space in text
+    # delete the command
+    await context.message.delete()
 
-    # deletes bill command
-    await command.channel.purge(limit=1, check=is_not_me)
-
-    # assemble new bill
-    text = remove_command(text, 5)
-    text = assemble_bill(text, get_index(), author)
+    # make bill
+    number = await get_last_billnumber() + 1
+    text = assemble_bill(text, number, context.author.mention)
 
     # send bill
     message = await senatorial_voting.send(text)
-    increase_index()
 
     # add reactions
     await message.add_reaction(yes_vote)
@@ -167,43 +137,27 @@ async def make_bill(command):
 
 
 # takes the whole command/message as input and assembles and sends the amendment
-async def make_amendment(command):
-    # deletes command command
-    await command.channel.purge(limit=1, check=is_not_me)
-
-    # variable set up
-    text = command.content  # get command
-    author = command.author.mention  # get author
-
-    args = text.split(' ')
-
-    billnumber = to_int(args[1])  # get index
-    if billnumber == '':
-        await command.channel.send('No valid bill number was given ' + author)
-        return
+@bot.command(name='amendment',
+             aliases=['amend'],
+             rest_is_raw=True)
+async def make_amendment(context, billnumber: to_int, *, text):
+    # delete the command
+    await context.message.delete()
 
     if not is_number(billnumber):
-        print(billnumber, '1')
         return
-    billnumber = int(billnumber)
-    number = get_index()
 
     # assemble new message
-    text = remove_command(text, 10)
-    text = clean_digits(text)
-    text = assemble_amendment(text, number, billnumber, author)
+    number = await get_last_billnumber() + 1
+    text = assemble_amendment(text, number, billnumber, context.author.mention)
 
     # errors
-    file = open('index.txt', 'r')
-    index = int(file.read())
-    file.close()
-    if index < billnumber:
-        await senate.send('You can\'t amend a non-existent bill.' + author)
+    if billnumber >= number:
+        await senate.send('You can\'t amend a non-existent bill.' + context.author.mention)
         return
 
     # send command
     message = await senatorial_voting.send(text)
-    increase_index()
 
     # add reactions
     await message.add_reaction(yes_vote)
@@ -211,41 +165,36 @@ async def make_amendment(command):
     await message.add_reaction(abstain_vote)
 
 
-async def edit(command):
-    # variable set up
-    text = command.content
-    author = command.author.mention
+@bot.command(name='edit',
+             aliases=['editbill', 'editamendment'],
+             rest_is_raw=True)
+async def edit(context, index: to_int, *, text):
+    # delete the command
+    await context.message.delete()
 
-    args = text.split(' ')  # TODO fix two spaces resulting in empty strings
-    index = to_int(args[1])  # get index
-    if index == '':
-        await command.channel.send('No valid bill number was given' + author)
+    number = await get_last_billnumber() + 1
+
+    # errors
+    if index >= number:
+        await context.author.send('You can\'t amend a non-existent bill.')
         return
-    isamendment = False
 
-    # clean command + digit
-    text = remove_command(text, 5)
-    text = clean_digits(text)
+    if not is_number(index):
+        await context.author.send(index + ' is not a valid number.')
+        return
 
-    # search bill by index TODO check if bill has been concluded before editing
-    messages = await senatorial_voting.history(limit=40).flatten()
-    original = changes = billauthor = billnumber = ''  # initialize variables
-    for i, message in enumerate(messages):
-        content = message.content.split(' ')
-        if len(content) > 1:
-            if to_int(content[1]) == index and message.author == client.user:
-                original = message
-                changes = content
-                billauthor = content[len(content) - 2]
-                if content[2] == 'Amendment' and content[3] == 'to':
-                    billnumber = content[5]
-                    billnumber = billnumber.strip('*')
-                    isamendment = True
-                break
+    history = await senatorial_voting.history().flatten()
+    original = discord.utils.find(lambda m: m.content.startswith('**Bill ' + str(index)), history)
+
+    tmp = original.content.split(' ')
+    if not tmp[len(tmp) - 2] == context.author.mention:
+        await context.author.send('You cannot edit a bill that is not yours.')
+        return
+
+    changes = original.content.split(' ')
 
     if original == '':
-        await command.channel.send(
-            'Either no bill with that index in the last 40 messages or other invalid input.' + author)
+        await context.author.send('No bill with that number was found.')
         return
 
     # clean changes
@@ -255,88 +204,59 @@ async def edit(command):
         changestemp = changestemp + element + ' '
     changes = changestemp
 
-    # error messages
-    if not author == billauthor:
-        await command.channel.send('This is not your Bill. ' + author)
-        return
-
-    # assemble new message
-    if isamendment:
-        content = assemble_amendment(text, index, billnumber, author)
+    if changes[2] == 'Amendment' and changes[3] == 'to':
+        billnumber = to_int(changes[5])
+        content = assemble_amendment(text, index, billnumber, context.author.mention)
     else:
-        content = assemble_bill(text, index, author)
+        content = assemble_bill(text, index, context.author.mention)
 
     # edit command
-    if original != '':
-        await original.edit(content=content)
-        await senate.send(
-            'Previous wording: ' + '\r\n' + '```' + changes + '```' + '\r\n' + 'Success. ' + author)
-    else:
-        await senate.send('A bug seems to have crept itself into the code.')
+    await original.edit(content=content)
+    await senate.send(
+        'Previous wording: ' + '\r\n' + '```' + changes + '```' + '\r\n' + 'Success. ' + context.author.mention)
 
 
-async def make_option(command):
-    # variable set up
-    text = command.content  # get bill
-    author = command.author.mention  # get author
-
+@bot.command(name='option',
+             aliases=['options', 'optionbill', 'optionsbill'],
+             rest_is_raw=True)
+async def make_option(context, amount: to_int, *, text):
     # deletes command message
-    await command.channel.purge(limit=1, check=is_not_me)
+    await context.message.delete()
 
     # variable set up
-    args = text.split(' ')
-    amount = args[1]  # get number
-    if not is_number(amount):
-        return
-    amount = int(amount)
-    number = get_index()
+    number = await get_last_billnumber() + 1
 
     # assemble new bill
-    text = remove_command(text, 7)
-    text = clean_digits(text)
-    text = assemble_bill(text, number, author)
+    text = assemble_bill(text, number, context.author.mention)
 
     # send option
     await send_option(text, senatorial_voting, amount)
 
 
-async def make_amendmentoption(command):
-    # variable set up
-    text = command.content  # get bill
-    author = command.author.mention  # get author
-
+@bot.command(name='amendmentoption',
+             aliases=['amendmentoptions', 'optionamendment', 'optionsamendment'],
+             rest_is_raw=True)
+async def make_amendmentoption(context, billnumber: to_int, amount: to_int, *, text):
     # deletes command message
-    await command.channel.purge(limit=1, check=is_not_me)
+    await context.message.delete()
 
-    # variable set up
-    args = text.split(' ')
+    number = await get_last_billnumber() + 1
 
-    billnumber = to_int(args[1])  # get index
-    if billnumber == '':
-        await command.channel.send('No valid bill number was given' + author)
+    # errors
+    if billnumber >= number:
+        await context.author.send('You can\'t amend a non-existent bill.')
         return
 
     if not is_number(billnumber):
+        await context.author.send(billnumber + ' is not a valid number.')
         return
-    billnumber = int(billnumber)
-    amount = args[2]  # get options amount
+
     if not is_number(amount):
+        await context.author.send(amount + ' is not a valid number.')
         return
-    amount = int(amount)
-    number = get_index()
 
     # assemble new amendment
-    text = remove_command(text, 16)
-    text = clean_digits(text)
-    text = assemble_amendment(text, number, billnumber, author)
-
-    # errors
-    file = open('index.txt', 'r')
-    index = int(file.read())
-    file.close()
-    if index < billnumber:
-        await senate.send('You can\'t amend a non-existent bill.' + author)
-        return
+    text = assemble_amendment(text, number, billnumber, context.author.mention)
 
     # send option
     await send_option(text, senatorial_voting, amount)
@@ -345,7 +265,6 @@ async def make_amendmentoption(command):
 async def send_option(text, channel, amount):
     # send amendment
     text = await channel.send(text)
-    increase_index()
 
     # add reactions
     if amount < 2:
@@ -378,27 +297,6 @@ async def send_option(text, channel, amount):
     await text.add_reaction(abstain_vote)
 
 
-async def set_index(command):
-    # variable set up
-    text = command.content  # get command
-    author = command.author.mention  # get author
-
-    # variable set up
-    args = text.split(' ')
-    indexnew = args[1]  # get newindex
-    if not is_number(indexnew):
-        await senate.send('That\'s not a number. ' + author)
-        return
-
-    # edit index
-    file = open('index.txt', 'w')
-    file.write(str(int(indexnew) - 1))
-    file.close()
-
-    # response
-    await senate.send('Success, the next bill number will be: ' + indexnew + '. ' + author)
-
-
 async def meme_voting(message):
     if len(message.embeds) < 1:
         return
@@ -409,7 +307,7 @@ async def meme_voting(message):
     await message.add_reaction(ear_with_hearing_aid)
 
 
-@client.event
+@bot.event
 async def on_message(message):
     # no reaction if bot
     if message.author.bot:
@@ -418,38 +316,9 @@ async def on_message(message):
     # this is so commands continue to work
     await bot.process_commands(message)
 
-    # in #senatorial-voting or in #senate and &edit
-    if (message.channel == channels["senatorial_voting"] or (
-            message.channel == channels["senate"] and message.content.lower().startswith('&edit')) or
-            message.channel == channels["staff_bot_commands"]):
-
-        # bill scenario
-        if message.content.lower().startswith('&bill '):
-            await make_bill(message)
-
-        # amendment scenario
-        if message.content.lower().startswith('&amendment '):
-            await make_amendment(message)
-
-        # edit bill
-        if message.content.lower().startswith('&edit '):
-            await edit(message)
-
-        # option scenario
-        if message.content.lower().startswith('&option '):
-            await make_option(message)
-
-        # amendment option
-        if message.content.lower().startswith('&amendmentoption '):
-            await make_amendmentoption(message)
-
-        # edit command numbers
-        if message.content.lower().startswith('&index '):
-            await set_index(message)
-
     # meme voting
     if message.channel == channels["memes"]:
         await meme_voting(message)
 
 
-client.run('Nzc3ODY3NDAxNTQyMTA3MTQ4.X7JreA.RhAvIT0kp-BAB30SsduZh1wipT8')
+bot.run('Nzc3ODY3NDAxNTQyMTA3MTQ4.X7JreA.RhAvIT0kp-BAB30SsduZh1wipT8')
