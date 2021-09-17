@@ -23,7 +23,6 @@ abstain_vote = '<:Abstain:867869367601070081>'
 recycle = '♻️'
 ear_with_hearing_aid = '🦻'
 global channels
-global commands
 
 
 @client.event
@@ -71,13 +70,11 @@ def is_not_me(m):
     return not m.author == client.user
 
 
-# returns the index
-def get_index():
-    text = open('index.txt', 'r')
-    number = text.read()
-    text.close()
-    number = int(number) + 1
-    return number
+# returns the index of the last bill
+async def get_index():
+    history = await senatorial_voting.history().flatten()
+    message = discord.utils.find(lambda m: m.content.startswith('**Bill'), history)
+    return to_int(message.content.split(' ')[1])
 
 
 # increases index by 1
@@ -417,6 +414,9 @@ async def on_message(message):
     # no reaction if bot
     if message.author.bot:
         return
+
+    # this is so commands continue to work
+    await bot.process_commands(message)
 
     # in #senatorial-voting or in #senate and &edit
     if (message.channel == channels["senatorial_voting"] or (
