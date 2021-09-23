@@ -117,8 +117,7 @@ def to_int(string):
 
 
 # takes the whole command/message as input and assembles and sends the bill
-@bot.command(name='bill',
-             rest_is_raw=True)
+@bot.command(name='bill')
 async def make_bill(context, *, text):  # TODO strip the leading space in text
     # delete the command
     await context.message.delete()
@@ -138,8 +137,7 @@ async def make_bill(context, *, text):  # TODO strip the leading space in text
 
 # takes the whole command/message as input and assembles and sends the amendment
 @bot.command(name='amendment',
-             aliases=['amend'],
-             rest_is_raw=True)
+             aliases=['amend'])
 async def make_amendment(context, billnumber: to_int, *, text):
     # delete the command
     await context.message.delete()
@@ -166,8 +164,7 @@ async def make_amendment(context, billnumber: to_int, *, text):
 
 
 @bot.command(name='edit',
-             aliases=['editbill', 'editamendment'],
-             rest_is_raw=True)
+             aliases=['editbill', 'editamendment'])
 async def edit(context, index: to_int, *, text):
     # delete the command
     await context.message.delete()
@@ -217,8 +214,7 @@ async def edit(context, index: to_int, *, text):
 
 
 @bot.command(name='option',
-             aliases=['options', 'optionbill', 'optionsbill'],
-             rest_is_raw=True)
+             aliases=['options', 'optionbill', 'optionsbill'])
 async def make_option(context, amount: to_int, *, text):
     # deletes command message
     await context.message.delete()
@@ -234,8 +230,7 @@ async def make_option(context, amount: to_int, *, text):
 
 
 @bot.command(name='amendmentoption',
-             aliases=['amendmentoptions', 'optionamendment', 'optionsamendment'],
-             rest_is_raw=True)
+             aliases=['amendmentoptions', 'optionamendment', 'optionsamendment'])
 async def make_amendmentoption(context, billnumber: to_int, amount: to_int, *, text):
     # deletes command message
     await context.message.delete()
