@@ -1,0 +1,36 @@
+{
+  "testing": {
+    "channels": {
+      "senatorial_voting_channel": 867857838142783529,
+      "senate_channel": 867738868181368855,
+      "staff_bot_commands_channel": 885604958609756190
+    },
+    "roles": {
+      "senator": "<@&867863600973742121>"
+    },
+    "emojis": {
+      "yes_vote": "<:Yes:867869297329176587>",
+      "no_vote": "<:No:867869349041799198>",
+      "abstain_vote": "<:Abstain:867869367601070081>",
+      "recycle": "♻️",
+      "ear_with_hearing_aid": "🦻"
+    }
+  },
+  "server": {
+    "channels": {
+      "senatorial_voting_channel": 698212804808671294,
+      "senate_channel": 694963794757156952,
+      "staff_bot_commands_channel": 498634929064771605
+    },
+    "roles": {
+      "senator": "<@&691576535781605417>"
+    },
+    "emojis": {
+      "yes_vote": "<:Yes:698226023795261451>",
+      "no_vote": "<:No:698226052899799130>",
+      "abstain_vote": "<:Abstain:698226077113516118>",
+      "recycle": "♻️",
+      "ear_with_hearing_aid": "🦻"
+    }
+  }
+}

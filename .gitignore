@@ -213,4 +213,4 @@ fabric.properties
 
 
 ### Private Configuration ###
-token.json
+src/etbot/token.json

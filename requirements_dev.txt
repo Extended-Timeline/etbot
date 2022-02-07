@@ -1,0 +1,5 @@
+pytest==7.*
+pytest-cov==3.*
+mypy===0.931
+flake8==4.*
+tox==3.*
