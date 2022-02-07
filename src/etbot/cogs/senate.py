@@ -10,18 +10,31 @@ def setup(bot: commands.Bot) -> None:
 
 
 def assemble_bill(text: str, bill_index: int, author: str) -> str:
-    text = f"**Bill {str(bill_index)}:** \r\n{text}" \
-           f"\r\nBill by: {author}" \
+    text = f"**Bill {str(bill_index)}:** " \
+           f"\r\n{text} " \
+           f"\r\nBill by: {author} " \
            f"\r\n{roles.senator}"
     return text
 
 
 def assemble_amendment(text: str, bill_index: int, bill_number: int, author: str):
     text = f"**Bill {str(bill_index)}:** Amendment to **Bill {str(bill_number)}** " \
-           f"\r\n{str(text)}" \
-           f"\r\nBill by: {str(author)}" \
+           f"\r\n{str(text)} " \
+           f"\r\nBill by: {str(author)} " \
            f"\r\n{roles.senator}"
     return text
+
+
+# removes everything but numbers from a string and converts it to an integer
+def to_int(string: str):
+    number = ''
+    for c in string:
+        if c.isdigit():
+            number += c
+
+    if number == '':
+        return number
+    return int(number)
 
 
 class Senate(commands.Cog):
@@ -123,8 +136,70 @@ class Senate(commands.Cog):
 
     @commands.command(name="edit", aliases=["Edit"])
     @commands.has_role("Senator")
-    async def edit(self, ctx: commands.Context, bill_number: int, *, text: str):
-        pass
+    async def edit(self, ctx: commands.Context, bill_index: int, *, text: str):
+        # deletes bill command
+        await ctx.message.delete()
+
+        # variable set up
+        author: str = ctx.author.mention
+
+        # check that bill_number is valid
+        if bill_index > index.get_index():
+            msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}")
+            await msg.delete(delay=60)
+            return
+
+        is_amendment = False
+
+        # search bill by index TODO check if bill has been concluded before editing
+        messages = await channels.senatorial_voting.history(limit=40).flatten()
+        original: Message | None = None
+        changes: list[str] | None = None
+        bill_author: str | None = None
+        bill_number: str | None = None
+
+        for msg in messages:
+            content = msg.content.split(' ')
+            if len(content) <= 1:
+                continue
+            if to_int(content[1]) == bill_index and msg.author == self.bot.user:
+                original = msg
+                changes = content
+                bill_author = content[len(content) - 2]
+                if content[2] == 'Amendment' and content[3] == 'to':
+                    bill_number = content[5]
+                    bill_number = bill_number.strip('*')
+                    is_amendment = True
+                break
+
+        # clean changes
+        changes = changes[:len(changes) - 4]
+        changestemp = ''
+        for element in changes:
+            changestemp = changestemp + element + ' '
+        changes = changestemp
+
+        # error messages
+        if original is None:
+            await ctx.channel.send(f"No bill with that index in the last 40 messages. {author}")
+            return
+        if not author == bill_author:
+            await ctx.channel.send(f"This is not your Bill. {author}")
+            return
+
+        # assemble new message
+        if is_amendment:
+            content = assemble_amendment(text, bill_index, int(bill_number), author)
+        else:
+            content = assemble_bill(text, bill_index, author)
+
+        # edit command
+        if original is not None:
+            await original.edit(content=content)
+            await channels.senate.send(
+                f"Previous wording: \r\n```{changes}```\r\nSuccess. {author}")
+        else:
+            await channels.senate.send("A bug seems to have crept itself into the code.")
 
     @commands.command(name="index", aliases=["Index"])
     @commands.has_guild_permissions(administrator=True)
