@@ -189,10 +189,12 @@ class Senate(commands.Cog):
 
         # error messages
         if original is None:
-            await ctx.channel.send(f"No bill with that index in the last 40 messages. {author}")
+            msg: Message = await ctx.channel.send(f"No bill with that index in the last 40 messages. {author}")
+            await msg.delete(delay=60)
             return
         if not author == bill_author:
-            await ctx.channel.send(f"This is not your Bill. {author}")
+            msg: Message = await ctx.channel.send(f"This is not your Bill. {author}")
+            await msg.delete(delay=60)
             return
 
         # assemble new message
