@@ -25,6 +25,10 @@ def assemble_amendment(text: str, bill_index: int, bill_number: int, author: str
     return text
 
 
+def senatorial_channels_check(ctx: commands.Context) -> bool:
+    return ctx.message.channel in [channels.senate, channels.senatorial_voting, channels.staff_bot_commands]
+
+
 # removes everything but numbers from a string and converts it to an integer
 def to_int(string: str):
     number = ''
@@ -44,6 +48,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="bill", aliases=["Bill"])
     @commands.has_role("Senator")
+    @commands.check(senatorial_channels_check)
     async def bill(self, ctx: commands.Context, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -64,6 +69,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="amendment", aliases=["Amendment"])
     @commands.has_role("Senator")
+    @commands.check(senatorial_channels_check)
     async def amendment(self, ctx: commands.Context, bill_number: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -90,6 +96,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="option", aliases=["Option"])
     @commands.has_role("Senator")
+    @commands.check(senatorial_channels_check)
     async def option(self, ctx: commands.Context, options: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -110,6 +117,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="amendmentoption", aliases=["Amendmentoption"])
     @commands.has_role("Senator")
+    @commands.check(senatorial_channels_check)
     async def amendment_option(self, ctx: commands.Context, bill_number: int, options: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -136,6 +144,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="edit", aliases=["Edit"])
     @commands.has_role("Senator")
+    @commands.check(senatorial_channels_check)
     async def edit(self, ctx: commands.Context, bill_index: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -176,7 +185,7 @@ class Senate(commands.Cog):
         changes = changes[:len(changes) - 4]
         changes_string: str | None = None
         for element in changes:
-            changes_string = changes_string + element + ' '
+            changes_string = f"{changes_string}{element} "
 
         # error messages
         if original is None:
@@ -202,6 +211,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="index", aliases=["Index"])
     @commands.has_guild_permissions(administrator=True)
+    @commands.check(senatorial_channels_check)
     async def set_index(self, ctx: commands.Context, new_index: int):
         index.set_index(new_index)
         msg: Message = await ctx.channel.send(f"Index set to {new_index}.")
