@@ -30,6 +30,7 @@ class Senate(commands.Cog):
         self.bot = bot
 
     @commands.command(name="bill", aliases=["Bill"])
+    @commands.has_role("Senator")
     async def bill(self, ctx: commands.Context, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -49,6 +50,7 @@ class Senate(commands.Cog):
         await msg.add_reaction(emojis.abstain_vote)
 
     @commands.command(name="amendment", aliases=["Amendment"])
+    @commands.has_role("Senator")
     async def amendment(self, ctx: commands.Context, bill_number: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -73,14 +75,17 @@ class Senate(commands.Cog):
         await msg.add_reaction(emojis.abstain_vote)
 
     @commands.command(name="option", aliases=["Option"])
+    @commands.has_role("Senator")
     async def option(self, ctx: commands.Context, option_amount: int, *, text: str):
         pass
 
     @commands.command(name="amendmentoption", aliases=["Amendmentoption"])
+    @commands.has_role("Senator")
     async def amendment_option(self, ctx: commands.Context, bill_number: int, option_amount: int, *, text: str):
         pass
 
     @commands.command(name="edit", aliases=["Edit"])
+    @commands.has_role("Senator")
     async def edit(self, ctx: commands.Context, bill_number: int, *, text: str):
         pass
 
