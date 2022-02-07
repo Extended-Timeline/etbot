@@ -158,8 +158,8 @@ class Senate(commands.Cog):
         bill_author: str | None = None
         bill_number: str | None = None
 
-        for msg in messages:
-            content = msg.content.split(' ')
+        for msg in messages:  # TODO make this work better and not depend on precise spacing...
+            content: list[str] = msg.content.split(' ')
             if len(content) <= 1:
                 continue
             if to_int(content[1]) == bill_index and msg.author == self.bot.user:
@@ -174,10 +174,9 @@ class Senate(commands.Cog):
 
         # clean changes
         changes = changes[:len(changes) - 4]
-        changestemp = ''
+        changes_string: str | None = None
         for element in changes:
-            changestemp = changestemp + element + ' '
-        changes = changestemp
+            changes_string = changes_string + element + ' '
 
         # error messages
         if original is None:
@@ -189,15 +188,15 @@ class Senate(commands.Cog):
 
         # assemble new message
         if is_amendment:
-            content = assemble_amendment(text, bill_index, int(bill_number), author)
+            content_string: str = assemble_amendment(text, bill_index, int(bill_number), author)
         else:
-            content = assemble_bill(text, bill_index, author)
+            content_string: str = assemble_bill(text, bill_index, author)
 
         # edit command
         if original is not None:
-            await original.edit(content=content)
+            await original.edit(content=content_string)
             await channels.senate.send(
-                f"Previous wording: \r\n```{changes}```\r\nSuccess. {author}")
+                f"Previous wording: \r\n```{changes_string}```\r\nSuccess. {author}")
         else:
             await channels.senate.send("A bug seems to have crept itself into the code.")
 
