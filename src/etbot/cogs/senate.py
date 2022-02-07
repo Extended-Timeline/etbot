@@ -96,8 +96,28 @@ class Senate(commands.Cog):
 
     @commands.command(name="amendmentoption", aliases=["Amendmentoption"])
     @commands.has_role("Senator")
-    async def amendment_option(self, ctx: commands.Context, bill_number: int, option_amount: int, *, text: str):
-        pass
+    async def amendment_option(self, ctx: commands.Context, bill_number: int, options: int, *, text: str):
+        # deletes bill command
+        await ctx.message.delete()
+
+        # variable set up
+        author: str = ctx.author.mention
+
+        # check that bill_number is valid
+        if bill_number > index.get_index():
+            msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}")
+            await msg.delete(delay=60)
+
+        index.increment_index()
+        text: str = assemble_amendment(text, index.get_index(), bill_number, author)
+
+        msg: Message = await channels.senatorial_voting.send(text)
+
+        # add reactions
+        for i in range(0, options):
+            await msg.add_reaction(emojis.options[i])
+        await msg.add_reaction(emojis.no_vote)
+        await msg.add_reaction(emojis.abstain_vote)
 
     @commands.command(name="edit", aliases=["Edit"])
     @commands.has_role("Senator")
