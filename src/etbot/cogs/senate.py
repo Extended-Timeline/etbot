@@ -1,7 +1,7 @@
 from disnake import Message
 from disnake.ext import commands
 
-from etbot.vars import channels, roles, emojis, index
+from ..vars import channels, roles, emojis, index
 
 
 def setup(bot: commands.Bot) -> None:

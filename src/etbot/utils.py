@@ -1,4 +1,4 @@
-from etbot import main
+import main
 
 
 def is_me(ctx): return ctx.author == main.bot.user
