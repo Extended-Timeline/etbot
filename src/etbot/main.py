@@ -5,7 +5,7 @@ import sys
 
 from disnake.ext import commands
 
-from .vars import channels, emojis, roles
+from src.etbot.vars import channels, emojis, roles
 
 logging.basicConfig(level=logging.INFO)
 
@@ -58,7 +58,7 @@ def main(argv: list[str] or None = None) -> None:
 
     load_extensions()
 
-    with open("src/etbot/token.json", 'r') as token_file:
+    with open("token.json", 'r') as token_file:
         token = json.load(token_file)["token"]
     bot.run(token)
 
