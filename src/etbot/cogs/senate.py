@@ -62,6 +62,7 @@ class Senate(commands.Cog):
         if bill_number > index.get_index():
             msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}")
             await msg.delete(delay=60)
+            return
 
         index.increment_index()
         text: str = assemble_amendment(text, index.get_index(), bill_number, author)
@@ -107,6 +108,7 @@ class Senate(commands.Cog):
         if bill_number > index.get_index():
             msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}")
             await msg.delete(delay=60)
+            return
 
         index.increment_index()
         text: str = assemble_amendment(text, index.get_index(), bill_number, author)
