@@ -26,7 +26,14 @@ def assemble_amendment(text: str, bill_index: int, bill_number: int, author: str
 
 
 def senatorial_channels_check(ctx: commands.Context) -> bool:
-    return ctx.message.channel in [channels.senate, channels.senatorial_voting, channels.staff_bot_commands]
+    # Add special channel permissions for specific commands by making a special case for it
+    match ctx.command.qualified_name:
+        case "edit":
+            allowed_channels = [channels.senate]
+        case _:
+            allowed_channels: list[channels] = [channels.senate, channels.senatorial_voting,
+                                                channels.staff_bot_commands]
+    return ctx.message.channel in allowed_channels
 
 
 # removes everything but numbers from a string and converts it to an integer
