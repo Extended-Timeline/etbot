@@ -29,9 +29,10 @@ def senatorial_channels_check(ctx: commands.Context) -> bool:
     # Add special channel permissions for specific commands by making a special case for it
     match ctx.command.qualified_name:
         case "edit":
-            allowed_channels = [channels.senate]
+            allowed_channels: list[channels] = [channels.senate]
         case _:
-            allowed_channels: list[channels] = [channels.senate, channels.senatorial_voting,
+            allowed_channels: list[channels] = [channels.senate,
+                                                channels.senatorial_voting,
                                                 channels.staff_bot_commands]
     return ctx.message.channel in allowed_channels
 
