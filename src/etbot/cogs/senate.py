@@ -87,8 +87,8 @@ class Senate(commands.Cog):
 
         # check that bill_number is valid
         if bill_number > index.get_index():
-            msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}")
-            await msg.delete(delay=60)
+            await channels.senate.send(f"No valid bill number was given. {author}"
+                                       f"\r\n```{ctx.message.clean_content}```")
             return
 
         index.increment_index()
@@ -135,8 +135,8 @@ class Senate(commands.Cog):
 
         # check that bill_number is valid
         if bill_number > index.get_index():
-            msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}")
-            await msg.delete(delay=60)
+            msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}"
+                                                          f"\r\n```{ctx.message.clean_content}```")
             return
 
         index.increment_index()
@@ -162,8 +162,8 @@ class Senate(commands.Cog):
 
         # check that bill_number is valid
         if bill_index > index.get_index():
-            msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}")
-            await msg.delete(delay=60)
+            msg: Message = await ctx.message.channel.send(f"No valid bill number was given. {author}"
+                                                          f"\r\n```{ctx.message.clean_content}```")
             return
 
         is_amendment = False
@@ -197,12 +197,12 @@ class Senate(commands.Cog):
 
         # error messages
         if original is None:
-            msg: Message = await ctx.channel.send(f"No bill with that index in the last 40 messages. {author}")
-            await msg.delete(delay=60)
+            msg: Message = await ctx.channel.send(f"No bill with that index in the last 40 messages. {author}"
+                                                  f"\r\n```{ctx.message.clean_content}```")
             return
         if not author == bill_author:
-            msg: Message = await ctx.channel.send(f"This is not your Bill. {author}")
-            await msg.delete(delay=60)
+            msg: Message = await ctx.channel.send(f"This is not your Bill. {author}"
+                                                  f"\r\n```{ctx.message.clean_content}```")
             return
 
         # assemble new message
