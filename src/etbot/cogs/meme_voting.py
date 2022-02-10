@@ -1,7 +1,7 @@
 from disnake import Message
 from disnake.ext import commands
 
-from src.etbot.vars import channels, emojis
+from vars import channels, emojis
 
 
 def setup(bot):

@@ -5,7 +5,7 @@ import sys
 
 from disnake.ext import commands
 
-from src.etbot.vars import channels, emojis, roles
+from vars import channels, emojis, roles
 
 logging.basicConfig(level=logging.INFO)
 
