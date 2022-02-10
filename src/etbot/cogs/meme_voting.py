@@ -10,7 +10,7 @@ def setup(bot):
 
 
 async def vote_on_meme(message: Message):
-    if len(message.embeds) < 1:
+    if len(message.embeds) < 1 and len(message.attachments) < 1:
         return
 
     await message.add_reaction(emojis.yes_vote)
