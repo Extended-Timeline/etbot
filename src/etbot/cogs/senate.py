@@ -3,10 +3,24 @@ from disnake.ext import commands
 
 from vars import channels, roles, emojis, index
 
+_history_limit: int = 500
+
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Senate(bot))
     print("Loaded Senate Cog.")
+
+
+async def find_bill(bot: commands.Bot, bill_number: int) -> Message | None:
+    messages = await channels.get_senatorial_voting().history(limit=_history_limit).flatten()
+
+    for msg in messages:  # TODO make this work better and not depend on precise spacing...
+        content: list[str] = msg.content.split(' ')
+        if len(content) <= 1:
+            continue
+        if to_int(content[1]) == bill_number and msg.author == bot.user:
+            return msg
+    return None
 
 
 def assemble_bill(text: str, bill_index: int, author: str) -> str:
@@ -173,7 +187,7 @@ class Senate(commands.Cog):
                       brief="Edits the bill with the given number.",
                       help="Usage: &edit [bill_number] [new_text] \n"
                            "Edits the bill with the given number. \n"
-                           "Will fail if you are not the original author of the bill to be edited.")
+                           "Will return an error if you are not the original author of the bill to be edited.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
     async def edit(self, ctx: commands.Context, bill_index: int, *, text: str):
@@ -192,37 +206,28 @@ class Senate(commands.Cog):
         is_amendment = False
 
         # search bill by index TODO check if bill has been concluded before editing
-        messages = await channels.get_senatorial_voting().history(limit=40).flatten()
-        original: Message | None = None
-        changes: list[str] | None = None
-        bill_author: str | None = None
-        bill_number: str | None = None
-
-        for msg in messages:  # TODO make this work better and not depend on precise spacing...
-            content: list[str] = msg.content.split(' ')
-            if len(content) <= 1:
-                continue
-            if to_int(content[1]) == bill_index and msg.author == self.bot.user:
-                original = msg
-                changes = content
-                bill_author = content[len(content) - 2]
-                if content[2] == 'Amendment' and content[3] == 'to':
-                    bill_number = content[5]
-                    bill_number = bill_number.strip('*')
-                    is_amendment = True
-                break
-
-        # clean changes
-        changes = changes[:len(changes) - 4]
-        changes_string: str | None = None
-        for element in changes:
-            changes_string = f"{changes_string}{element} "
-
-        # error messages
+        original: Message | None = await find_bill(self.bot, bill_index)
+        # error message
         if original is None:
-            await ctx.channel.send(f"No bill with that index in the last 40 messages. {author}"
+            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
+
+        content: list[str] | None = original.content.split(' ')
+        bill_author: str | None = content[len(content) - 2]
+        bill_number: str | None = None
+        if content[2] == 'Amendment' and content[3] == 'to':
+            bill_number = content[5]
+            bill_number = bill_number.strip('*')
+            is_amendment = True
+
+        # clean changes
+        changes = content[:len(content) - 4]
+        changes_string: str = ''
+        for element in changes:
+            changes_string += f"{element} "
+
+        # error message
         if not author == bill_author:
             await ctx.channel.send(f"This is not your Bill. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
