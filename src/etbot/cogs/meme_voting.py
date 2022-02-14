@@ -20,7 +20,7 @@ async def vote_on_meme(message: Message):
 
 
 class MemeVoting(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
@@ -30,5 +30,5 @@ class MemeVoting(commands.Cog):
             return
 
         # meme voting
-        if message.channel == channels.memes:
+        if message.channel == channels.get_memes():
             await vote_on_meme(message)

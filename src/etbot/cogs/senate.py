@@ -17,7 +17,7 @@ def assemble_bill(text: str, bill_index: int, author: str) -> str:
     return text
 
 
-def assemble_amendment(text: str, bill_index: int, bill_number: int, author: str):
+def assemble_amendment(text: str, bill_index: int, bill_number: int, author: str) -> str:
     text = f"**Bill {str(bill_index)}:** Amendment to **Bill {str(bill_number)}** " \
            f"\r\n{str(text)} " \
            f"\r\nBill by: {str(author)} " \
@@ -30,25 +30,25 @@ def senatorial_channels_check(ctx: commands.Context) -> bool:
     allowed_channels: list[channels]
     match ctx.command.qualified_name:
         case "edit":
-            allowed_channels = [channels.senate]
+            allowed_channels = [channels.get_senate()]
         case "index":
-            allowed_channels = [channels.staff_bot_commands]
+            allowed_channels = [channels.get_staff_bot_commands()]
         case _:
-            allowed_channels = [channels.senate,
-                                channels.senatorial_voting,
-                                channels.staff_bot_commands]
+            allowed_channels = [channels.get_senate(),
+                                channels.get_senatorial_voting(),
+                                channels.get_staff_bot_commands()]
     return ctx.message.channel in allowed_channels
 
 
 # removes everything but numbers from a string and converts it to an integer
-def to_int(string: str):
+def to_int(string: str) -> int | None:
     number = ''
     for c in string:
         if c.isdigit():
             number += c
 
     if number == '':
-        return number
+        return None
     return int(number)
 
 
@@ -71,7 +71,7 @@ class Senate(commands.Cog):
         text: str = assemble_bill(text, index.get_index(), author)
 
         # send bill
-        msg: Message = await channels.senatorial_voting.send(text)
+        msg: Message = await channels.get_senatorial_voting().send(text)
 
         # add reactions
         await msg.add_reaction(emojis.yes_vote)
@@ -90,15 +90,15 @@ class Senate(commands.Cog):
 
         # check that bill_number is valid
         if bill_number > index.get_index():
-            await channels.senate.send(f"No valid bill number was given. {author}"
-                                       f"\r\n```{ctx.message.clean_content}```")
+            await channels.get_senate().send(f"No valid bill number was given. {author}"
+                                             f"\r\n```{ctx.message.clean_content}```")
             return
 
         index.increment_index()
         text: str = assemble_amendment(text, index.get_index(), bill_number, author)
 
         # send amendment
-        msg: Message = await channels.senatorial_voting.send(text)
+        msg: Message = await channels.get_senatorial_voting().send(text)
 
         # add reactions
         await msg.add_reaction(emojis.yes_vote)
@@ -118,7 +118,7 @@ class Senate(commands.Cog):
         index.increment_index()
         text: str = assemble_bill(text, index.get_index(), author)
 
-        msg: Message = await channels.senatorial_voting.send(text)
+        msg: Message = await channels.get_senatorial_voting().send(text)
 
         # add reactions
         for i in range(0, options):
@@ -145,7 +145,7 @@ class Senate(commands.Cog):
         index.increment_index()
         text: str = assemble_amendment(text, index.get_index(), bill_number, author)
 
-        msg: Message = await channels.senatorial_voting.send(text)
+        msg: Message = await channels.get_senatorial_voting().send(text)
 
         # add reactions
         for i in range(0, options):
@@ -172,7 +172,7 @@ class Senate(commands.Cog):
         is_amendment = False
 
         # search bill by index TODO check if bill has been concluded before editing
-        messages = await channels.senatorial_voting.history(limit=40).flatten()
+        messages = await channels.get_senatorial_voting().history(limit=40).flatten()
         original: Message | None = None
         changes: list[str] | None = None
         bill_author: str | None = None
@@ -217,11 +217,11 @@ class Senate(commands.Cog):
         # edit command
         if original is not None:
             await original.edit(content=content_string)
-            await channels.senate.send(f"Previous wording: "
-                                       f"\r\n```{changes_string}```"
-                                       f"\r\nSuccess. {author}")
+            await channels.get_senate().send(f"Previous wording: "
+                                             f"\r\n```{changes_string}```"
+                                             f"\r\nSuccess. {author}")
         else:
-            await channels.senate.send("A bug seems to have crept itself into the code.")
+            await channels.get_senate().send("A bug seems to have crept itself into the code.")
 
     @commands.command(name="index", aliases=["Index"])
     @commands.has_guild_permissions(administrator=True)

@@ -53,7 +53,7 @@ def parse_args(argv: list[str]) -> None:
 
 
 def main(argv: list[str] or None = None) -> None:
-    if argv:  # TODO check if it works
+    if argv:
         parse_args(argv)
 
     load_extensions()
