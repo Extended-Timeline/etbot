@@ -5,7 +5,7 @@ import sys
 
 from disnake.ext import commands
 
-from vars import channels, emojis, roles
+from vars import channels, emojis, roles, messages
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,10 +21,12 @@ async def on_ready() -> None:
         channels.initialize_testing_channels(bot)
         emojis.initialize_testing_emojis()
         roles.initialize_testing_roles()
+        messages.initialize_testing_messages()
     else:
         channels.initialize_channels(bot)
         emojis.initialize_emojis()
         roles.initialize_roles()
+        messages.initialize_messages()
 
     print(f"Anwesend {bot.user.name}")
 
