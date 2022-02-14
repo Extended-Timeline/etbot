@@ -19,12 +19,12 @@ async def on_ready() -> None:
     # TODO check if this can be improved with using bot.start()
     if testing:
         channels.initialize_testing_channels(bot)
-        emojis.initialize_testing_emojis()
+        emojis.initialize_testing_emojis(bot)
         roles.initialize_testing_roles()
         messages.initialize_testing_messages()
     else:
         channels.initialize_channels(bot)
-        emojis.initialize_emojis()
+        emojis.initialize_emojis(bot)
         roles.initialize_roles()
         messages.initialize_messages()
 
