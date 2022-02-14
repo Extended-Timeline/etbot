@@ -32,6 +32,7 @@ async def on_ready() -> None:
 def load_extensions() -> None:
     bot.load_extension("cogs.senate")
     bot.load_extension("cogs.meme_voting")
+    bot.load_extension("cogs.support")
 
 
 def parse_args(argv: list[str]) -> None:
