@@ -13,7 +13,8 @@ class Support(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @commands.command(name="support", aliases=["Support"])
+    @commands.command(name="support", aliases=["Support"],
+                      brief="Responds with the support FAQ.")
     async def support(self, ctx: commands.Context):
         msg: Message = await messages.get_support()
         await ctx.channel.send(msg.content)

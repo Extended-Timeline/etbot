@@ -57,7 +57,11 @@ class Senate(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @commands.command(name="bill", aliases=["Bill"])
+    @commands.command(name="bill", aliases=["Bill"],
+                      brief="Assembles a bill with the given text.",
+                      help="Usage: &bill [bill_text] \n"
+                           "Assembles a bill with the given text. \n"
+                           "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
     async def bill(self, ctx: commands.Context, *, text: str):
@@ -78,7 +82,11 @@ class Senate(commands.Cog):
         await msg.add_reaction(emojis.no_vote)
         await msg.add_reaction(emojis.abstain_vote)
 
-    @commands.command(name="amendment", aliases=["Amendment"])
+    @commands.command(name="amendment", aliases=["Amendment"],
+                      brief="Assembles an amendment with the given text and bill_number.",
+                      help="Usage: &amendment [bill_number] [amendment_text] \n"
+                           "Assembles an amendment with the given text and bill_number. \n"
+                           "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
     async def amendment(self, ctx: commands.Context, bill_number: int, *, text: str):
@@ -105,7 +113,11 @@ class Senate(commands.Cog):
         await msg.add_reaction(emojis.no_vote)
         await msg.add_reaction(emojis.abstain_vote)
 
-    @commands.command(name="option", aliases=["Option"])
+    @commands.command(name="option", aliases=["Option"],
+                      brief="Assembles an option bill with the given text.",
+                      help="Usage: &option [option_number] [amendment_text] \n"
+                           "Assembles a bill with the given text and amount of options. \n"
+                           "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
     async def option(self, ctx: commands.Context, options: int, *, text: str):
@@ -126,7 +138,11 @@ class Senate(commands.Cog):
         await msg.add_reaction(emojis.no_vote)
         await msg.add_reaction(emojis.abstain_vote)
 
-    @commands.command(name="amendmentoption", aliases=["Amendmentoption"])
+    @commands.command(name="amendmentoption", aliases=["Amendmentoption"],
+                      brief="Assembles an option amendment with the given text and bill.",
+                      help="Usage: &amendmentoption [bill_number] [option_number 2-6] [amendment_text] \n"
+                           "Assembles an amendment with the given text and bill_number and amount of options. \n"
+                           "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
     async def amendment_option(self, ctx: commands.Context, bill_number: int, options: int, *, text: str):
@@ -153,7 +169,11 @@ class Senate(commands.Cog):
         await msg.add_reaction(emojis.no_vote)
         await msg.add_reaction(emojis.abstain_vote)
 
-    @commands.command(name="edit", aliases=["Edit"])
+    @commands.command(name="edit", aliases=["Edit"],
+                      brief="Edits the bill with the given number.",
+                      help="Usage: &edit [bill_number] [new_text] \n"
+                           "Edits the bill with the given number. \n"
+                           "Will fail if you are not the original author of the bill to be edited.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
     async def edit(self, ctx: commands.Context, bill_index: int, *, text: str):
@@ -223,7 +243,11 @@ class Senate(commands.Cog):
         else:
             await channels.get_senate().send("A bug seems to have crept itself into the code.")
 
-    @commands.command(name="index", aliases=["Index"])
+    @commands.command(name="index", aliases=["Index"],
+                      brief="Overrides the saved bill index.",
+                      help="Usage: &index [new_index] \n"
+                           "Overrides the saved bill index. \n"
+                           "Only to be used in case of an error with the automatic counting.")
     @commands.has_guild_permissions(administrator=True)
     @commands.check(senatorial_channels_check)
     async def set_index(self, ctx: commands.Context, new_index: int):
