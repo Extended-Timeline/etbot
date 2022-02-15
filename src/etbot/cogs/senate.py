@@ -129,11 +129,18 @@ class Senate(commands.Cog):
                                              f"\r\n```{ctx.message.clean_content}```")
             return
 
+        bill = await find_bill(self.bot, bill_number)
+        # error message
+        if bill is None:
+            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
         index.increment_index()
         text: str = assemble_amendment(text, index.get_index(), bill_number, author)
 
         # send amendment
-        msg: Message = await channels.get_senatorial_voting().send(text)
+        msg: Message = await bill.reply(text)
 
         # add reactions
         await msg.add_reaction(emojis.yes_vote)
@@ -185,10 +192,17 @@ class Senate(commands.Cog):
                                            f"\r\n```{ctx.message.clean_content}```")
             return
 
+        bill = await find_bill(self.bot, bill_number)
+        # error message
+        if bill is None:
+            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
         index.increment_index()
         text: str = assemble_amendment(text, index.get_index(), bill_number, author)
 
-        msg: Message = await channels.get_senatorial_voting().send(text)
+        msg: Message = await bill.reply(text)
 
         # add reactions
         for i in range(0, options):
