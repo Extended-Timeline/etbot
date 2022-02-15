@@ -20,12 +20,12 @@ async def on_ready() -> None:
     if testing:
         channels.initialize_testing_channels(bot)
         emojis.initialize_testing_emojis(bot)
-        roles.initialize_testing_roles()
+        roles.initialize_testing_roles(bot)
         messages.initialize_testing_messages()
     else:
         channels.initialize_channels(bot)
         emojis.initialize_emojis(bot)
-        roles.initialize_roles()
+        roles.initialize_roles(bot)
         messages.initialize_messages()
 
     print(f"Anwesend {bot.user.name}")

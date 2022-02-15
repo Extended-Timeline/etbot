@@ -22,11 +22,17 @@ async def find_bill(bot: commands.Bot, bill_number: int) -> Message | None:
     messages = await channels.get_senatorial_voting().history(limit=_history_limit).flatten()
 
     for msg in messages:  # TODO make this work better and not depend on precise spacing...
+        if msg.author != bot.user:
+            continue
+        if roles.senator not in msg.role_mentions:
+            continue
+
         content: list[str] = msg.content.split(' ')
         if len(content) <= 1:
             continue
-        if to_int(content[1]) == bill_number and msg.author == bot.user:
-            return msg
+        if to_int(content[1]) != bill_number:
+            continue
+        return msg
     return None
 
 
@@ -34,7 +40,7 @@ def assemble_bill(text: str, bill_index: int, author: str) -> str:
     text = f"**Bill {str(bill_index)}:** " \
            f"\r\n{text} " \
            f"\r\nBill by: {author} " \
-           f"\r\n{roles.senator}"
+           f"\r\n{roles.senator.mention}"
     return text
 
 
@@ -42,7 +48,7 @@ def assemble_amendment(text: str, bill_index: int, bill_number: int, author: str
     text = f"**Bill {str(bill_index)}:** Amendment to **Bill {str(bill_number)}** " \
            f"\r\n{str(text)} " \
            f"\r\nBill by: {str(author)} " \
-           f"\r\n{roles.senator}"
+           f"\r\n{roles.senator.mention}"
     return text
 
 
