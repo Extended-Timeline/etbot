@@ -332,6 +332,12 @@ class Senate(commands.Cog):
         await bill.reply(f"Bill {bill_number} passes."
                          f"\n{comment}{content[len(content) - 2]}")
 
+        # clean changes
+        wording: str = ''
+        for element in content[:len(content) - 4]:
+            wording += f"{element} "
+        await channels.get_passed_bills().send(wording)
+
     @commands.command(name="fail", aliases=["Fail"],
                       brief="Fails the bill with the given number.",
                       help="Usage: &fail [bill_number] [comment]\n"

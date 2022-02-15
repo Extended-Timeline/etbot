@@ -12,6 +12,7 @@ _senatorial_voting_id: int | None = None
 _staff_bot_commands_id: int | None = None
 _support_id: int | None = None
 _memes_id: int | None = None
+_passed_bills_id: int | None = None
 
 
 def get_senate() -> GuildChannel | Thread | PrivateChannel:
@@ -49,6 +50,13 @@ def get_memes() -> GuildChannel | Thread | PrivateChannel:
     return channel
 
 
+def get_passed_bills() -> GuildChannel | Thread | PrivateChannel:
+    channel = _bot.get_channel(_passed_bills_id)
+    if channel is None:
+        raise Exception("Channel not found")
+    return channel
+
+
 # init to set all the values at the start of the bot
 def initialize_testing_channels(bot: commands.Bot):
     this._bot = bot
@@ -57,6 +65,7 @@ def initialize_testing_channels(bot: commands.Bot):
     this._staff_bot_commands_id = 885604958609756190
     this._memes_id = 888136237146337280
     this._support_id = 941390755971354685
+    this._passed_bills_id = 943157076648153089
 
 
 def initialize_channels(bot: commands.Bot):
@@ -66,3 +75,4 @@ def initialize_channels(bot: commands.Bot):
     this._staff_bot_commands_id = 498634929064771605
     this._memes_id = 515253664860995604
     this._support_id = 504743243226021929
+    this._passed_bills_id = 749320980354170972
