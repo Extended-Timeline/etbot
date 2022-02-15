@@ -86,8 +86,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="bill", aliases=["Bill"],
                       brief="Assembles a bill with the given text.",
-                      help="Usage: &bill [bill_text] \n"
-                           "Assembles a bill with the given text. \n"
+                      help="Assembles a bill with the given text. \n"
                            "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
@@ -111,8 +110,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="amendment", aliases=["Amendment"],
                       brief="Assembles an amendment with the given text and bill_number.",
-                      help="Usage: &amendment [bill_number] [amendment_text] \n"
-                           "Assembles an amendment with the given text and bill_number. \n"
+                      help="Assembles an amendment with the given text and bill_number. \n"
                            "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
@@ -149,8 +147,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="option", aliases=["Option"],
                       brief="Assembles an option bill with the given text.",
-                      help="Usage: &option [option_number] [amendment_text] \n"
-                           "Assembles a bill with the given text and amount of options. \n"
+                      help="Assembles a bill with the given text and amount of options. \n"
                            "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
@@ -174,8 +171,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="amendmentoption", aliases=["Amendmentoption"],
                       brief="Assembles an option amendment with the given text and bill.",
-                      help="Usage: &amendmentoption [bill_number] [option_number 2-6] [amendment_text] \n"
-                           "Assembles an amendment with the given text and bill_number and amount of options. \n"
+                      help="Assembles an amendment with the given text and bill_number and amount of options. \n"
                            "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
@@ -212,8 +208,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="edit", aliases=["Edit"],
                       brief="Edits the bill with the given number.",
-                      help="Usage: &edit [bill_number] [new_text] \n"
-                           "Edits the bill with the given number. \n"
+                      help="Edits the bill with the given number. \n"
                            "Will return an error if you are not the original author of the bill to be edited.")
     @commands.has_role("Senator")
     @commands.check(senatorial_channels_check)
@@ -282,8 +277,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="index", aliases=["Index"],
                       brief="Overrides the saved bill index.",
-                      help="Usage: &index [new_index] \n"
-                           "Overrides the saved bill index. \n"
+                      help="Overrides the saved bill index. \n"
                            "Only to be used in case of an error with the automatic counting.")
     @commands.has_guild_permissions(administrator=True)
     @commands.check(senatorial_channels_check)
@@ -294,8 +288,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="pass", aliases=["Pass"],
                       brief="Passes the bill with the given number.",
-                      help="Usage: &pass [bill_number] [comment]\n"
-                           "Passes the bill with the given number. \n"
+                      help="Passes the bill with the given number. \n"
                            "Marks the given bill as passed using the appropriate emoji "
                            "and replies to the bill informing about it's passing.")
     @commands.has_role("Emperor")
@@ -340,8 +333,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="fail", aliases=["Fail"],
                       brief="Fails the bill with the given number.",
-                      help="Usage: &fail [bill_number] [comment]\n"
-                           "Fails the bill with the given number. \n"
+                      help="Fails the bill with the given number. \n"
                            "Marks the given bill as failed using the appropriate emoji "
                            "and replies to the bill informing about it's failing.")
     @commands.has_role("Emperor")
@@ -380,8 +372,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="veto", aliases=["Veto"],
                       brief="Vetoes the bill with the given number.",
-                      help="Usage: &veto [bill_number] [comment]\n"
-                           "Vetoes the bill with the given number. \n"
+                      help="Vetoes the bill with the given number. \n"
                            "Marks the given bill as vetoed using the appropriate emoji "
                            "and replies to the bill informing about it being vetoed.")
     @commands.has_role("Emperor")
@@ -420,8 +411,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="void", aliases=["Void"],
                       brief="Voids the bill with the given number.",
-                      help="Usage: &void [bill_number] [comment]\n"
-                           "Voids the bill with the given number. \n"
+                      help="Voids the bill with the given number. \n"
                            "Marks the given bill as voided using the appropriate emoji "
                            "and replies to the bill informing about it being voided.")
     @commands.has_role("Emperor")
@@ -460,8 +450,7 @@ class Senate(commands.Cog):
 
     @commands.command(name="withdraw", aliases=["Withdraw"],
                       brief="Withdraws the bill with the given number.",
-                      help="Usage: &withdraw [bill_number] [comment]\n"
-                           "Withdraws the bill with the given number. \n"
+                      help="Withdraws the bill with the given number. \n"
                            "Marks the given bill as withdrawn using the appropriate emoji "
                            "and replies to the bill informing about it's withdrawal.")
     @commands.check(senatorial_channels_check)
