@@ -13,7 +13,7 @@ def setup(bot: commands.Bot) -> None:
 
 async def check_bill_closed(bill: Message) -> bool:
     for reaction in bill.reactions:
-        if reaction.emoji in [emojis.bill_closed, emojis.void, emojis.withdrawn]:
+        if reaction.emoji in [emojis.bill_closed, emojis.imperial_authority, emojis.void, emojis.withdrawn]:
             return True
     return False
 
