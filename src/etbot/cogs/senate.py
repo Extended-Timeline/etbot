@@ -11,6 +11,13 @@ def setup(bot: commands.Bot) -> None:
     print("Loaded Senate Cog.")
 
 
+async def check_bill_closed(bill: Message) -> bool:
+    for reaction in bill.reactions:
+        if reaction.emoji in [emojis.bill_closed, emojis.void, emojis.withdrawn]:
+            return True
+    return False
+
+
 async def find_bill(bot: commands.Bot, bill_number: int) -> Message | None:
     messages = await channels.get_senatorial_voting().history(limit=_history_limit).flatten()
 
@@ -210,6 +217,11 @@ class Senate(commands.Cog):
         # error message
         if original is None:
             await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+        # check that the bill isn't closed already
+        if await check_bill_closed(original):
+            await ctx.channel.send(f"You cannot edit an already closed bill. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
 
