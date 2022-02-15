@@ -3,7 +3,7 @@ from disnake.ext import commands
 
 from vars import channels, roles, emojis, index
 
-_history_limit: int = 500
+_history_limit: int = 100
 
 
 def setup(bot: commands.Bot) -> None:
@@ -11,7 +11,7 @@ def setup(bot: commands.Bot) -> None:
     print("Loaded Senate Cog.")
 
 
-async def check_bill_closed(bill: Message) -> bool:
+async def check_bill_concluded(bill: Message) -> bool:
     for reaction in bill.reactions:
         if reaction.emoji in [emojis.bill_closed, emojis.imperial_authority, emojis.void, emojis.withdrawn]:
             return True
@@ -226,7 +226,7 @@ class Senate(commands.Cog):
                                    f"\r\n```{ctx.message.clean_content}```")
             return
         # check that the bill isn't closed already
-        if await check_bill_closed(original):
+        if await check_bill_concluded(original):
             await ctx.channel.send(f"You cannot edit an already closed bill. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
@@ -246,7 +246,7 @@ class Senate(commands.Cog):
             changes_string += f"{element} "
 
         # error message
-        if not author == bill_author:
+        if author != bill_author:
             await ctx.channel.send(f"This is not your Bill. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
@@ -277,3 +277,210 @@ class Senate(commands.Cog):
         index.set_index(new_index)
         msg: Message = await ctx.channel.send(f"Index set to {new_index}.")
         await msg.delete(delay=60)
+
+    @commands.command(name="pass", aliases=["Pass"],
+                      brief="Passes the bill with the given number.",
+                      help="Usage: &pass [bill_number] [comment]\n"
+                           "Passes the bill with the given number. \n"
+                           "Marks the given bill as passed using the appropriate emoji "
+                           "and replies to the bill informing about it's passing.")
+    @commands.has_role("Emperor")
+    @commands.check(senatorial_channels_check)
+    async def pass_bill(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
+        await ctx.message.delete()
+
+        # variable set up
+        author: str = ctx.author.mention
+        if comment != '':
+            comment += ' '
+
+        # check that bill_number is valid
+        if bill_number > index.get_index():
+            await ctx.message.channel.send(f"No valid bill number was given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        bill = await find_bill(self.bot, bill_number)
+        # error message
+        if bill is None:
+            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+        # check that the bill isn't closed already
+        if await check_bill_concluded(bill):
+            await ctx.channel.send(f"Bill has already been concluded. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        await bill.add_reaction(emojis.bill_closed)
+
+        content: list[str] = bill.content.split(' ')
+        await bill.reply(f"Bill {bill_number} passes."
+                         f"\n{comment}{content[len(content) - 2]}")
+
+    @commands.command(name="fail", aliases=["Fail"],
+                      brief="Fails the bill with the given number.",
+                      help="Usage: &fail [bill_number] [comment]\n"
+                           "Fails the bill with the given number. \n"
+                           "Marks the given bill as failed using the appropriate emoji "
+                           "and replies to the bill informing about it's failing.")
+    @commands.has_role("Emperor")
+    @commands.check(senatorial_channels_check)
+    async def fail(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
+        await ctx.message.delete()
+
+        # variable set up
+        author: str = ctx.author.mention
+        if comment != '':
+            comment += ' '
+
+        # check that bill_number is valid
+        if bill_number > index.get_index():
+            await ctx.message.channel.send(f"No valid bill number was given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        bill = await find_bill(self.bot, bill_number)
+        # error message
+        if bill is None:
+            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+        # check that the bill isn't closed already
+        if await check_bill_concluded(bill):
+            await ctx.channel.send(f"Bill has already been concluded. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        await bill.add_reaction(emojis.bill_closed)
+
+        content: list[str] = bill.content.split(' ')
+        await bill.reply(f"Bill {bill_number} does not pass."
+                         f"\n{comment}{content[len(content) - 2]}")
+
+    @commands.command(name="veto", aliases=["Veto"],
+                      brief="Vetoes the bill with the given number.",
+                      help="Usage: &veto [bill_number] [comment]\n"
+                           "Vetoes the bill with the given number. \n"
+                           "Marks the given bill as vetoed using the appropriate emoji "
+                           "and replies to the bill informing about it being vetoed.")
+    @commands.has_role("Emperor")
+    @commands.check(senatorial_channels_check)
+    async def veto(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
+        await ctx.message.delete()
+
+        # variable set up
+        author: str = ctx.author.mention
+        if comment != '':
+            comment += ' '
+
+        # check that bill_number is valid
+        if bill_number > index.get_index():
+            await ctx.message.channel.send(f"No valid bill number was given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        bill = await find_bill(self.bot, bill_number)
+        # error message
+        if bill is None:
+            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+        # check that the bill isn't closed already
+        if await check_bill_concluded(bill):
+            await ctx.channel.send(f"Bill has already been concluded. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        await bill.add_reaction(emojis.imperial_authority)
+
+        content: list[str] = bill.content.split(' ')
+        await bill.reply(f"Bill {bill_number} is vetoed."
+                         f"\r\n{comment}{content[len(content) - 2]}")
+
+    @commands.command(name="void", aliases=["Void"],
+                      brief="Voids the bill with the given number.",
+                      help="Usage: &void [bill_number] [comment]\n"
+                           "Voids the bill with the given number. \n"
+                           "Marks the given bill as voided using the appropriate emoji "
+                           "and replies to the bill informing about it being voided.")
+    @commands.has_role("Emperor")
+    @commands.check(senatorial_channels_check)
+    async def void(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
+        await ctx.message.delete()
+
+        # variable set up
+        author: str = ctx.author.mention
+        if comment != '':
+            comment += ' '
+
+        # check that bill_number is valid
+        if bill_number > index.get_index():
+            await ctx.message.channel.send(f"No valid bill number was given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        bill = await find_bill(self.bot, bill_number)
+        # error message
+        if bill is None:
+            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+        # check that the bill isn't closed already
+        if await check_bill_concluded(bill):
+            await ctx.channel.send(f"Bill has already been concluded. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        await bill.add_reaction(emojis.void)
+
+        content: list[str] = bill.content.split(' ')
+        await bill.reply(f"Bill {bill_number} is void."
+                         f"\r\n{comment}{content[len(content) - 2]}")
+
+    @commands.command(name="withdraw", aliases=["Withdraw"],
+                      brief="Withdraws the bill with the given number.",
+                      help="Usage: &withdraw [bill_number] [comment]\n"
+                           "Withdraws the bill with the given number. \n"
+                           "Marks the given bill as withdrawn using the appropriate emoji "
+                           "and replies to the bill informing about it's withdrawal.")
+    @commands.check(senatorial_channels_check)
+    async def withdraw(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
+        await ctx.message.delete()
+
+        # variable set up
+        author: str = ctx.author.mention
+        if comment != '':
+            comment += ' '
+
+        # check that bill_number is valid
+        if bill_number > index.get_index():
+            await ctx.message.channel.send(f"No valid bill number was given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        bill = await find_bill(self.bot, bill_number)
+        # error message
+        if bill is None:
+            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+        # check that the bill isn't closed already
+        if await check_bill_concluded(bill):
+            await ctx.channel.send(f"Bill has already been concluded. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        content: list[str] | None = bill.content.split(' ')
+        bill_author: str | None = content[len(content) - 2]
+        # error message
+        if author != bill_author:
+            await ctx.channel.send(f"This is not your Bill. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        await bill.add_reaction(emojis.withdrawn)
+
+        content: list[str] = bill.content.split(' ')
+        await bill.reply(f"Bill {bill_number} is withdrawn."
+                         f"\r\n{comment}{content[len(content) - 2]}")
