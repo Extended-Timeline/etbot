@@ -1,6 +1,7 @@
 import getopt
 import json
 import logging
+import os
 import sys
 
 from disnake.ext import commands
@@ -32,9 +33,9 @@ async def on_ready() -> None:
 
 
 def load_extensions() -> None:
-    bot.load_extension("cogs.senate")
-    bot.load_extension("cogs.meme_voting")
-    bot.load_extension("cogs.support")
+    for filename in os.listdir("./src/etbot/cogs"):
+        if filename.endswith(".py") and filename != "__init__.py":
+            bot.load_extension(f"cogs.{filename[:-3]}")
 
 
 def parse_args(argv: list[str]) -> None:
