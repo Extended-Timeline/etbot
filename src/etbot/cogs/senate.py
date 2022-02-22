@@ -46,8 +46,8 @@ def assemble_bill(text: str, bill_index: int, author: str) -> str:
 
 def assemble_amendment(text: str, bill_index: int, bill_number: int, author: str) -> str:
     text = f"**Bill {str(bill_index)}:** Amendment to **Bill {str(bill_number)}** " \
-           f"\r\n{str(text)} " \
-           f"\r\nBill by: {str(author)} " \
+           f"\r\n{text} " \
+           f"\r\nBill by: {author} " \
            f"\r\n{roles.senator.mention}"
     return text
 
