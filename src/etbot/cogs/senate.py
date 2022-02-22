@@ -18,6 +18,25 @@ async def check_bill_concluded(bill: Message) -> bool:
     return False
 
 
+def check_senatorial_channels(ctx: commands.Context) -> bool:
+    # Add special channel permissions for specific commands by making a special case for it
+    allowed_channels: list[channels]
+    match ctx.command.qualified_name:
+        case "edit":
+            allowed_channels = [channels.get_senate()]
+        case "index":
+            allowed_channels = [channels.get_staff_bot_commands()]
+        case _:
+            allowed_channels = [channels.get_senate(),
+                                channels.get_senatorial_voting(),
+                                channels.get_staff_bot_commands()]
+    return ctx.message.channel in allowed_channels
+
+
+def check_is_staff(ctx: commands.Context) -> bool:
+    return any(role in ctx.author.roles for role in roles.staff_roles)
+
+
 async def find_bill(bot: commands.Bot, bill_number: int) -> Message | None:
     messages = await channels.get_senatorial_voting().history(limit=_history_limit).flatten()
 
@@ -52,21 +71,6 @@ def assemble_amendment(text: str, bill_index: int, bill_number: int, author: str
     return text
 
 
-def senatorial_channels_check(ctx: commands.Context) -> bool:
-    # Add special channel permissions for specific commands by making a special case for it
-    allowed_channels: list[channels]
-    match ctx.command.qualified_name:
-        case "edit":
-            allowed_channels = [channels.get_senate()]
-        case "index":
-            allowed_channels = [channels.get_staff_bot_commands()]
-        case _:
-            allowed_channels = [channels.get_senate(),
-                                channels.get_senatorial_voting(),
-                                channels.get_staff_bot_commands()]
-    return ctx.message.channel in allowed_channels
-
-
 # removes everything but numbers from a string and converts it to an integer
 def to_int(string: str) -> int | None:
     number = ''
@@ -89,7 +93,7 @@ class Senate(commands.Cog):
                       help="Assembles a bill with the given text. \n"
                            "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def bill(self, ctx: commands.Context, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -113,7 +117,7 @@ class Senate(commands.Cog):
                       help="Assembles an amendment with the given text and bill_number. \n"
                            "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def amendment(self, ctx: commands.Context, bill_number: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -150,7 +154,7 @@ class Senate(commands.Cog):
                       help="Assembles a bill with the given text and amount of options. \n"
                            "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def option(self, ctx: commands.Context, options: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -174,7 +178,7 @@ class Senate(commands.Cog):
                       help="Assembles an amendment with the given text and bill_number and amount of options. \n"
                            "Including mentioning senators and adding the reactions in the correct order.")
     @commands.has_role("Senator")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def amendment_option(self, ctx: commands.Context, bill_number: int, options: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -211,7 +215,7 @@ class Senate(commands.Cog):
                       help="Edits the bill with the given number. \n"
                            "Will return an error if you are not the original author of the bill to be edited.")
     @commands.has_role("Senator")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def edit(self, ctx: commands.Context, bill_index: int, *, text: str):
         # deletes bill command
         await ctx.message.delete()
@@ -280,7 +284,7 @@ class Senate(commands.Cog):
                       help="Overrides the saved bill index. \n"
                            "Only to be used in case of an error with the automatic counting.")
     @commands.has_guild_permissions(administrator=True)
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def set_index(self, ctx: commands.Context, new_index: int):
         index.set_index(new_index)
         msg: Message = await ctx.channel.send(f"Index set to {new_index}.")
@@ -292,7 +296,7 @@ class Senate(commands.Cog):
                            "Marks the given bill as passed using the appropriate emoji "
                            "and replies to the bill informing about it's passing.")
     @commands.has_role("Emperor")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def pass_bill(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
         await ctx.message.delete()
 
@@ -337,7 +341,7 @@ class Senate(commands.Cog):
                            "Marks the given bill as failed using the appropriate emoji "
                            "and replies to the bill informing about it's failing.")
     @commands.has_role("Emperor")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def fail(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
         await ctx.message.delete()
 
@@ -376,7 +380,7 @@ class Senate(commands.Cog):
                            "Marks the given bill as vetoed using the appropriate emoji "
                            "and replies to the bill informing about it being vetoed.")
     @commands.has_role("Emperor")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def veto(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
         await ctx.message.delete()
 
@@ -414,8 +418,8 @@ class Senate(commands.Cog):
                       help="Voids the bill with the given number. \n"
                            "Marks the given bill as voided using the appropriate emoji "
                            "and replies to the bill informing about it being voided.")
-    @commands.has_role("Emperor")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_is_staff)
+    @commands.check(check_senatorial_channels)
     async def void(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
         await ctx.message.delete()
 
@@ -453,7 +457,7 @@ class Senate(commands.Cog):
                       help="Withdraws the bill with the given number. \n"
                            "Marks the given bill as withdrawn using the appropriate emoji "
                            "and replies to the bill informing about it's withdrawal.")
-    @commands.check(senatorial_channels_check)
+    @commands.check(check_senatorial_channels)
     async def withdraw(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
         await ctx.message.delete()
 
