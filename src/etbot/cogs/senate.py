@@ -55,6 +55,21 @@ async def find_bill(bot: commands.Bot, bill_number: int) -> Message | None:
     return None
 
 
+def count_votes(bill: Message) -> str:
+    yes: int = -1
+    no: int = -1
+    abstain: int = -1
+    for reaction in bill.reactions:
+        match reaction.emoji:
+            case emojis.yes_vote:
+                yes += reaction.count
+            case emojis.no_vote:
+                no += reaction.count
+            case emojis.abstain_vote:
+                abstain += reaction.count
+    return f"\r\n{yes} {emojis.yes_vote} | {no} {emojis.no_vote} | {abstain} {emojis.abstain_vote}"
+
+
 def assemble_bill(text: str, bill_index: int, author: str) -> str:
     text = f"**Bill {str(bill_index)}:** " \
            f"\r\n{text} " \
@@ -333,6 +348,9 @@ class Senate(commands.Cog):
         wording: str = ''
         for element in content[:len(content) - 4]:
             wording += f"{element} "
+
+        # count votes
+        wording += count_votes(bill)
         await channels.get_passed_bills().send(wording)
 
     @commands.command(name="fail", aliases=["Fail"],
