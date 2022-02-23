@@ -10,7 +10,10 @@ from vars import channels, emojis, roles, messages
 
 logging.basicConfig(level=logging.INFO)
 
-bot = commands.Bot(command_prefix='&')
+bot = commands.Bot(
+    command_prefix='&',
+    sync_commands_debug=True
+)
 testing = False
 
 
