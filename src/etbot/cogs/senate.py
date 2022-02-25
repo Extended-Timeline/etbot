@@ -1,5 +1,6 @@
 from disnake import Message
 from disnake.ext import commands
+from disnake.ext.commands import MessageNotFound
 
 import utils
 from vars import channels, roles, emojis, index
@@ -40,9 +41,11 @@ def check_is_staff(ctx: commands.Context) -> bool:
 
 async def find_bill(bot: commands.Bot, bill_number: int, history: list[Message] | None = None) -> Message | None:
     if history is None:
-        history = await channels.get_senatorial_voting().history(limit=_history_limit).filter(utils.is_me).flatten()
+        history = await channels.get_senatorial_voting().history(limit=_history_limit).flatten()
 
     for msg in history:  # TODO make this not depend on precise spacing.
+        if utils.is_me(msg):
+            continue
         if roles.senator not in msg.role_mentions:
             continue
 
@@ -55,11 +58,10 @@ async def find_bill(bot: commands.Bot, bill_number: int, history: list[Message] 
 
     if len(history) == _history_limit:
         last: Message = history[_history_limit - 1]
-        history = await channels.get_senatorial_voting().history(limit=_history_limit, before=last) \
-            .filter(utils.is_me).flatten()
+        history = await channels.get_senatorial_voting().history(limit=_history_limit, before=last).flatten()
         return await find_bill(bot, bill_number, history)
 
-    return None
+    raise MessageNotFound
 
 
 def count_votes(bill: Message) -> str:
@@ -153,10 +155,10 @@ class Senate(commands.Cog):
                                              f"\r\n```{ctx.message.clean_content}```")
             return
 
-        bill = await find_bill(self.bot, bill_number)
-        # error message
-        if bill is None:
-            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+        try:
+            bill = await find_bill(self.bot, bill_number)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
 
@@ -214,10 +216,10 @@ class Senate(commands.Cog):
                                            f"\r\n```{ctx.message.clean_content}```")
             return
 
-        bill = await find_bill(self.bot, bill_number)
-        # error message
-        if bill is None:
-            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+        try:
+            bill = await find_bill(self.bot, bill_number)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
 
@@ -254,10 +256,10 @@ class Senate(commands.Cog):
         is_amendment = False
 
         # search bill by index
-        original: Message | None = await find_bill(self.bot, bill_index)
-        # error message
-        if original is None:
-            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+        try:
+            original: Message | None = await find_bill(self.bot, bill_index)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
         # check that the bill isn't closed already
@@ -333,10 +335,10 @@ class Senate(commands.Cog):
                                            f"\r\n```{ctx.message.clean_content}```")
             return
 
-        bill = await find_bill(self.bot, bill_number)
-        # error message
-        if bill is None:
-            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+        try:
+            bill = await find_bill(self.bot, bill_number)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
         # check that the bill isn't closed already
@@ -381,10 +383,10 @@ class Senate(commands.Cog):
                                            f"\r\n```{ctx.message.clean_content}```")
             return
 
-        bill = await find_bill(self.bot, bill_number)
-        # error message
-        if bill is None:
-            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+        try:
+            bill = await find_bill(self.bot, bill_number)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
         # check that the bill isn't closed already
@@ -420,10 +422,10 @@ class Senate(commands.Cog):
                                            f"\r\n```{ctx.message.clean_content}```")
             return
 
-        bill = await find_bill(self.bot, bill_number)
-        # error message
-        if bill is None:
-            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+        try:
+            bill = await find_bill(self.bot, bill_number)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
         # check that the bill isn't closed already
@@ -459,10 +461,10 @@ class Senate(commands.Cog):
                                            f"\r\n```{ctx.message.clean_content}```")
             return
 
-        bill = await find_bill(self.bot, bill_number)
-        # error message
-        if bill is None:
-            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+        try:
+            bill = await find_bill(self.bot, bill_number)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
         # check that the bill isn't closed already
@@ -497,10 +499,10 @@ class Senate(commands.Cog):
                                            f"\r\n```{ctx.message.clean_content}```")
             return
 
-        bill = await find_bill(self.bot, bill_number)
-        # error message
-        if bill is None:
-            await ctx.channel.send(f"No bill with that index in the last {_history_limit} messages. {author}"
+        try:
+            bill = await find_bill(self.bot, bill_number)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
                                    f"\r\n```{ctx.message.clean_content}```")
             return
         # check that the bill isn't closed already
