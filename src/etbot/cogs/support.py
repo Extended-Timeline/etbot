@@ -18,4 +18,4 @@ class Support(commands.Cog):
     async def support(self, inter: ApplicationCommandInteraction):
         await inter.response.defer()
         msg: Message = await messages.get_support()
-        await inter.response.edit_message(msg.content)
+        await inter.edit_original_message(content=msg.content)
