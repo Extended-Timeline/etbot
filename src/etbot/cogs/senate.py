@@ -1,6 +1,7 @@
 from disnake import Message
 from disnake.ext import commands
 
+import utils
 from vars import channels, roles, emojis, index
 
 _history_limit: int = 100
@@ -37,12 +38,11 @@ def check_is_staff(ctx: commands.Context) -> bool:
     return any(role in ctx.author.roles for role in roles.staff_roles)
 
 
-async def find_bill(bot: commands.Bot, bill_number: int) -> Message | None:
-    messages = await channels.get_senatorial_voting().history(limit=_history_limit).flatten()
+async def find_bill(bot: commands.Bot, bill_number: int, history: list[Message] | None = None) -> Message | None:
+    if history is None:
+        history = await channels.get_senatorial_voting().history(limit=_history_limit).filter(utils.is_me).flatten()
 
-    for msg in messages:  # TODO make this work better and not depend on precise spacing...
-        if msg.author != bot.user:
-            continue
+    for msg in history:  # TODO make this not depend on precise spacing.
         if roles.senator not in msg.role_mentions:
             continue
 
@@ -52,6 +52,13 @@ async def find_bill(bot: commands.Bot, bill_number: int) -> Message | None:
         if to_int(content[1]) != bill_number:
             continue
         return msg
+
+    if len(history) == _history_limit:
+        last: Message = history[_history_limit - 1]
+        history = await channels.get_senatorial_voting().history(limit=_history_limit, before=last) \
+            .filter(utils.is_me).flatten()
+        return await find_bill(bot, bill_number, history)
+
     return None
 
 
@@ -246,7 +253,7 @@ class Senate(commands.Cog):
 
         is_amendment = False
 
-        # search bill by index TODO check if bill has been concluded before editing
+        # search bill by index
         original: Message | None = await find_bill(self.bot, bill_index)
         # error message
         if original is None:
