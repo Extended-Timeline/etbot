@@ -1,4 +1,4 @@
-from disnake import Message
+from disnake import Message, ApplicationCommandInteraction
 from disnake.ext import commands
 
 from vars import messages
@@ -13,8 +13,9 @@ class Support(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @commands.command(name="support", aliases=["Support"],
-                      brief="Responds with the support FAQ.")
-    async def support(self, ctx: commands.Context):
+    @commands.slash_command(name="support",
+                            description="Responds with the support FAQ.")
+    async def support(self, inter: ApplicationCommandInteraction):
+        await inter.response.defer()
         msg: Message = await messages.get_support()
-        await ctx.channel.send(msg.content)
+        await inter.response.edit_message(msg.content)
