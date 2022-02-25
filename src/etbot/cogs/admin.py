@@ -19,7 +19,7 @@ class Admin(commands.Cog):
     async def cogs(self, inter: ApplicationCommandInteraction):
         await inter.response.defer()
         cogs: str = str(list(self.bot.cogs.keys()))
-        await inter.response.edit_message(cogs)
+        await inter.edit_original_message(content=cogs)
 
     @commands.slash_command(name="load",
                             description="Loads a cog.")
@@ -29,9 +29,9 @@ class Admin(commands.Cog):
         try:
             self.bot.load_extension(cog)
         except (ExtensionNotFound, ExtensionAlreadyLoaded, NoEntryPointError, ExtensionFailed) as e:
-            await inter.response.edit_message(e)
+            await inter.edit_original_message(content=e)
             return
-        await inter.response.edit_message("Cog loaded.")
+        await inter.edit_original_message(content="Cog loaded.")
 
     @commands.slash_command(name="unload",
                             description="Unloads a cog.")
@@ -41,9 +41,9 @@ class Admin(commands.Cog):
         try:
             self.bot.unload_extension(cog)
         except (ExtensionNotFound, ExtensionNotLoaded) as e:
-            await inter.response.edit_message(e)
+            await inter.edit_original_message(content=e)
             return
-        await inter.response.edit_message("Cog unloaded.")
+        await inter.edit_original_message(content="Cog unloaded.")
 
     @commands.slash_command(name="reload",
                             description="RelLoads a cog.")
@@ -54,6 +54,6 @@ class Admin(commands.Cog):
             self.bot.unload_extension(cog)
             self.bot.load_extension(cog)
         except (ExtensionNotFound, ExtensionNotLoaded, ExtensionAlreadyLoaded, NoEntryPointError, ExtensionFailed) as e:
-            await inter.response.edit_message(e)
+            await inter.edit_original_message(content=e)
             return
-        await inter.response.edit_message("Cog reloaded.")
+        await inter.edit_original_message(content="Cog reloaded.")
