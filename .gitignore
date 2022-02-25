@@ -213,5 +213,5 @@ fabric.properties
 
 
 ### Private Configuration ###
-token.json
+config.json
 index.txt

@@ -10,10 +10,14 @@ from vars import channels, emojis, roles, messages
 
 logging.basicConfig(level=logging.INFO)
 
+with open("config.json", 'r') as token_file:
+    token = json.load(token_file)["token"]
+    test_guilds = json.load(token_file)["test_guilds"]
+
 bot = commands.Bot(
     command_prefix='&',
     sync_commands_debug=True,
-    # test_guilds=[867738868181368852] # For testing remove the first #
+    test_guilds=test_guilds
 )
 testing = False
 
@@ -65,9 +69,6 @@ def main(argv: list[str] or None = None) -> None:
         parse_args(argv)
 
     load_extensions()
-
-    with open("token.json", 'r') as token_file:
-        token = json.load(token_file)["token"]
     bot.run(token)
 
 
