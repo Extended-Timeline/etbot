@@ -1,3 +1,4 @@
+from disnake import ApplicationCommandInteraction
 from disnake.ext import commands
 from disnake.ext.commands import ExtensionNotFound, ExtensionAlreadyLoaded, ExtensionFailed, NoEntryPointError, \
     ExtensionNotLoaded
@@ -12,43 +13,47 @@ class Admin(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @commands.command(name="cogs", aliases=["Cogs"],
-                      brief="Replies with a list of all the loaded cogs.")
+    @commands.slash_command(name="cogs",
+                            description="Replies with a list of all the loaded cogs.")
     @commands.has_guild_permissions(administrator=True)
-    async def cogs(self, ctx: commands.Context):
+    async def cogs(self, inter: ApplicationCommandInteraction):
+        await inter.response.defer()
         cogs: str = str(list(self.bot.cogs.keys()))
-        await ctx.send(cogs)
+        await inter.response.edit_message(cogs)
 
-    @commands.command(name="load", aliases=["Load"],
-                      brief="Loads a cog.")
+    @commands.slash_command(name="load",
+                            description="Loads a cog.")
     @commands.has_guild_permissions(administrator=True)
-    async def load(self, ctx: commands.Context, cog: str):
+    async def load(self, inter: ApplicationCommandInteraction, cog: str):
+        await inter.response.defer()
         try:
             self.bot.load_extension(cog)
         except (ExtensionNotFound, ExtensionAlreadyLoaded, NoEntryPointError, ExtensionFailed) as e:
-            await ctx.send(e)
+            await inter.response.edit_message(e)
             return
-        await ctx.send("Cog loaded.")
+        await inter.response.edit_message("Cog loaded.")
 
-    @commands.command(name="unload", aliases=["Unload"],
-                      brief="Unloads a cog.")
+    @commands.slash_command(name="unload",
+                            description="Unloads a cog.")
     @commands.has_guild_permissions(administrator=True)
-    async def unload(self, ctx: commands.Context, cog: str):
+    async def unload(self, inter: ApplicationCommandInteraction, cog: str):
+        await inter.response.defer()
         try:
             self.bot.unload_extension(cog)
         except (ExtensionNotFound, ExtensionNotLoaded) as e:
-            await ctx.send(e)
+            await inter.response.edit_message(e)
             return
-        await ctx.send("Cog unloaded.")
+        await inter.response.edit_message("Cog unloaded.")
 
-    @commands.command(name="reload", aliases=["Reload"],
-                      brief="RelLoads a cog.")
+    @commands.slash_command(name="reload",
+                            description="RelLoads a cog.")
     @commands.has_guild_permissions(administrator=True)
-    async def reload(self, ctx: commands.Context, cog: str):
+    async def reload(self, inter: ApplicationCommandInteraction, cog: str):
+        await inter.response.defer()
         try:
             self.bot.unload_extension(cog)
             self.bot.load_extension(cog)
         except (ExtensionNotFound, ExtensionNotLoaded, ExtensionAlreadyLoaded, NoEntryPointError, ExtensionFailed) as e:
-            await ctx.send(e)
+            await inter.response.edit_message(e)
             return
-        await ctx.send("Cog reloaded.")
+        await inter.response.edit_message("Cog reloaded.")
