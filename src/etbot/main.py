@@ -12,7 +12,8 @@ logging.basicConfig(level=logging.INFO)
 
 bot = commands.Bot(
     command_prefix='&',
-    sync_commands_debug=True
+    sync_commands_debug=True,
+    # test_guilds=[867738868181368852] # For testing remove the first #
 )
 testing = False
 
