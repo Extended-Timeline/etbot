@@ -477,7 +477,7 @@ class Senate(commands.Cog):
 
         content: list[str] = bill.content.split(' ')
         await bill.reply(f"Bill {bill_number} is void."
-                         f"\r\n{comment}{content[len(content) - 2]}")
+                         f"\r\n{comment} {content[len(content) - 2]}")
 
     @commands.command(name="withdraw", aliases=["Withdraw"],
                       brief="Withdraws the bill with the given number.",
