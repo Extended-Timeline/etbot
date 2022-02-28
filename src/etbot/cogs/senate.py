@@ -447,7 +447,7 @@ class Senate(commands.Cog):
                            "and replies to the bill informing about it being forced through.")
     @commands.has_role("Emperor")
     @commands.check(check_senatorial_channels)
-    async def veto(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
+    async def forcethrough(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
         await ctx.message.delete()
 
         # variable set up
