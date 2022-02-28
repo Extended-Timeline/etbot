@@ -3,7 +3,7 @@ from disnake.ext import commands
 
 from vars import channels, roles, emojis, index
 
-_history_limit: int = 1000
+_history_limit: int = 100
 
 
 def setup(bot: commands.Bot) -> None:
