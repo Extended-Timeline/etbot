@@ -12,6 +12,8 @@ logging.basicConfig(level=logging.INFO)
 
 with open("config.json", 'r') as token_file:
     token = json.load(token_file)["token"]
+
+with open("config.json", 'r') as token_file:
     test_guilds = json.load(token_file)["test_guilds"]
 
 bot = commands.Bot(
