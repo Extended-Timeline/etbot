@@ -14,6 +14,7 @@ bill_closed = None
 void = None
 withdrawn = None
 imperial_authority = None
+imperial_mandate = None
 
 
 def initialize_testing_emojis(bot: commands.Bot):
@@ -27,6 +28,7 @@ def initialize_testing_emojis(bot: commands.Bot):
     this.void = bot.get_emoji(942907470207131658)
     this.withdrawn = bot.get_emoji(943070133193179167)
     this.imperial_authority = bot.get_emoji(943087345773707294)
+    this.imperial_mandate = bot.get_emoji(947988924708560896)
 
 
 def initialize_emojis(bot: commands.Bot):
@@ -40,3 +42,4 @@ def initialize_emojis(bot: commands.Bot):
     this.void = bot.get_emoji(868451496595951656)
     this.withdrawn = bot.get_emoji(750073205389262908)
     this.imperial_authority = bot.get_emoji(503090066810339350)
+    this.imperial_mandate = bot.get_emoji(503090308704370728)

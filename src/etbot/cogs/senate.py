@@ -440,6 +440,45 @@ class Senate(commands.Cog):
         await bill.reply(f"Bill {bill_number} is vetoed."
                          f"\r\n{comment}{content[len(content) - 2]}")
 
+    @commands.command(name="forcethrough", aliases=["Forcethrough"],
+                      brief="Forces the bill with the given number through.",
+                      help="Forces the bill with the given number through. \n"
+                           "Marks the given bill as forced through using the appropriate emoji "
+                           "and replies to the bill informing about it being forced through.")
+    @commands.has_role("Emperor")
+    @commands.check(check_senatorial_channels)
+    async def veto(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
+        await ctx.message.delete()
+
+        # variable set up
+        author: str = ctx.author.mention
+        if comment != '':
+            comment += ' '
+
+        # check that bill_number is valid
+        if bill_number > index.get_index():
+            await ctx.message.channel.send(f"No valid bill number was given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        try:
+            bill = await find_bill(self.bot, bill_number)
+        except MessageNotFound as e:
+            await ctx.channel.send(f"No bill with that index found. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+        # check that the bill isn't closed already
+        if await check_bill_concluded(bill):
+            await ctx.channel.send(f"Bill has already been concluded. {author}"
+                                   f"\r\n```{ctx.message.clean_content}```")
+            return
+
+        await bill.add_reaction(emojis.imperial_mandate)
+
+        content: list[str] = bill.content.split(' ')
+        await bill.reply(f"Bill {bill_number} is forced through."
+                         f"\r\n{comment}{content[len(content) - 2]}")
+
     @commands.command(name="void", aliases=["Void"],
                       brief="Voids the bill with the given number.",
                       help="Voids the bill with the given number. \n"
