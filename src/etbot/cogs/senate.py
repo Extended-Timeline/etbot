@@ -14,10 +14,8 @@ def setup(bot: commands.Bot) -> None:
 
 
 async def check_bill_concluded(bill: Message) -> bool:
-    for reaction in bill.reactions:
-        if reaction.emoji in [emojis.bill_closed, emojis.imperial_authority, emojis.void, emojis.withdrawn]:
-            return True
-    return False
+    concluded_emojis = [emojis.bill_closed, emojis.imperial_authority, emojis.void, emojis.withdrawn]
+    return any(reaction.emoji in concluded_emojis for reaction in bill.reactions)
 
 
 def check_senatorial_channels(ctx: commands.Context) -> bool:
