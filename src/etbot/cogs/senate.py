@@ -63,8 +63,8 @@ async def find_bill(bot: commands.Bot, bill_number: int, history: list[Message] 
 
 
 def count_votes(bill: Message) -> str:
-    yes: int = -1
-    no: int = -1
+    yes, no = -1, -1
+    one, two, three, four, five, six = -1, -1, -1, -1, -1, -1
     abstain: int = -1
     for reaction in bill.reactions:
         match reaction.emoji:
@@ -72,9 +72,36 @@ def count_votes(bill: Message) -> str:
                 yes += reaction.count
             case emojis.no_vote:
                 no += reaction.count
+            case emojis.one:
+                one += reaction.count
+            case emojis.two:
+                two += reaction.count
+            case emojis.three:
+                three += reaction.count
+            case emojis.four:
+                four += reaction.count
+            case emojis.five:
+                five += reaction.count
+            case emojis.six:
+                six += reaction.count
             case emojis.abstain_vote:
                 abstain += reaction.count
-    return f"\r\n{yes} {emojis.yes_vote} | {no} {emojis.no_vote} | {abstain} {emojis.abstain_vote}"
+
+    vote_string: str = f"\r\n"
+    if yes >= 0:
+        vote_string += f"{yes} {emojis.yes_vote}"
+    if one >= 0 and two >= 0:
+        vote_string += f"{one} {emojis.one} | {two} {emojis.two}"
+    if three >= 0:
+        vote_string += f" | {three} {emojis.three}"
+    if four >= 0:
+        vote_string += f" | {four} {emojis.four}"
+    if five >= 0:
+        vote_string += f" | {five} {emojis.five}"
+    if six >= 0:
+        vote_string += f" | {six} {emojis.six}"
+    vote_string += f" | {no} {emojis.no_vote} | {abstain} {emojis.abstain_vote}"
+    return vote_string
 
 
 def assemble_bill(text: str, bill_index: int, author: str) -> str:
