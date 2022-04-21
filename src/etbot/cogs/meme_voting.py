@@ -45,3 +45,19 @@ class MemeVoting(commands.Cog):
 
         # add reactions
         await vote_on_meme(msg)
+
+    @commands.command(name="vote", aliases=["Vote"],
+                      brief="Assembles a vote with the given text.",
+                      help="Assembles a vote with the given text. \n"
+                           "Including adding the reactions in the correct order.")
+    async def vote(self, ctx: commands.Context):
+        # deletes vote command
+        await ctx.message.delete()
+
+        # variable set up
+        msg: Message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+
+        # add reactions
+        await msg.add_reaction(emojis.yes_vote)
+        await msg.add_reaction(emojis.no_vote)
+        await msg.add_reaction(emojis.abstain_vote)
