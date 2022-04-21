@@ -32,3 +32,16 @@ class MemeVoting(commands.Cog):
         # meme voting
         if message.channel == channels.get_memes():
             await vote_on_meme(message)
+
+    @commands.command(name="meme", aliases=["Meme"],
+                      brief="Adds the meme voting reactions to the referenced message.",
+                      help="Adds the meme voting reactions to the referenced message.")
+    async def meme(self, ctx: commands.Context):
+        # deletes meme command
+        await ctx.message.delete()
+
+        # variable set up
+        msg: Message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+
+        # add reactions
+        await vote_on_meme(msg)
