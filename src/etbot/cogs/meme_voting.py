@@ -29,8 +29,9 @@ class MemeVoting(commands.Cog):
         if message.author.bot:
             return
 
+        meme_channels = [channels.get_memes(), channels.get_religious_memes()]
         # meme voting
-        if message.channel == channels.get_memes():
+        if message.channel in meme_channels:
             await vote_on_meme(message)
 
     @commands.command(name="meme", aliases=["Meme"],
