@@ -18,42 +18,42 @@ _passed_bills_id: int | None = None
 def get_senate() -> GuildChannel | Thread | PrivateChannel:
     channel = _bot.get_channel(_senate_id)
     if channel is None:
-        raise Exception("Channel not found")
+        raise Exception("#senate not found")
     return channel
 
 
 def get_senatorial_voting() -> GuildChannel | Thread | PrivateChannel:
     channel = _bot.get_channel(_senatorial_voting_id)
     if channel is None:
-        raise Exception("Channel not found")
+        raise Exception("#senatorial-voting not found")
     return channel
 
 
 def get_staff_bot_commands() -> GuildChannel | Thread | PrivateChannel:
     channel = _bot.get_channel(_staff_bot_commands_id)
     if channel is None:
-        raise Exception("Channel not found")
+        raise Exception("#staff-bot-commands not found")
     return channel
 
 
 def get_support() -> GuildChannel | Thread | PrivateChannel:
     channel = _bot.get_channel(_support_id)
     if channel is None:
-        raise Exception("Channel not found")
+        raise Exception("#support not found")
     return channel
 
 
 def get_memes() -> GuildChannel | Thread | PrivateChannel:
     channel = _bot.get_channel(_memes_id)
     if channel is None:
-        raise Exception("Channel not found")
+        raise Exception("#memes not found")
     return channel
 
 
 def get_passed_bills() -> GuildChannel | Thread | PrivateChannel:
     channel = _bot.get_channel(_passed_bills_id)
     if channel is None:
-        raise Exception("Channel not found")
+        raise Exception("#passed-bills not found")
     return channel
 
 
