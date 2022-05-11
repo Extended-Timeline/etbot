@@ -14,7 +14,7 @@ _support_id: int | None = None
 _memes_id: int | None = None
 _passed_bills_id: int | None = None
 _religious_memes_id: int | None = None
-
+_out_of_context_screenshots_id: int | None = None
 
 def get_senate() -> GuildChannel | Thread | PrivateChannel:
     channel = _bot.get_channel(_senate_id)
@@ -65,6 +65,13 @@ def get_religious_memes() -> GuildChannel | Thread | PrivateChannel:
     return channel
 
 
+def get_out_of_context_screenshots() -> GuildChannel | Thread | PrivateChannel:
+    channel = _bot.get_channel(_out_of_context_screenshots_id)
+    if channel is None:
+        raise Exception("#out-of-context-screenshots not found")
+    return channel
+
+
 # init to set all the values at the start of the bot
 def initialize_testing_channels(bot: commands.Bot):
     this._bot = bot
@@ -75,6 +82,7 @@ def initialize_testing_channels(bot: commands.Bot):
     this._support_id = 941390755971354685
     this._passed_bills_id = 943157076648153089
     this._religious_memes_id = 971105466295935006
+    this._out_of_context_screenshots_id = 974068964156125296
 
 
 def initialize_channels(bot: commands.Bot):
@@ -86,3 +94,4 @@ def initialize_channels(bot: commands.Bot):
     this._support_id = 504743243226021929
     this._passed_bills_id = 749320980354170972
     this._religious_memes_id = 969724432283234384
+    this._out_of_context_screenshots_id = 874438552056913970

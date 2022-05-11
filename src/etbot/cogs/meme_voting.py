@@ -1,6 +1,9 @@
+import logging
+
 from disnake import Message
 from disnake.ext import commands
 
+import utils
 from vars import channels, emojis
 
 
@@ -10,7 +13,8 @@ def setup(bot):
 
 
 async def vote_on_meme(message: Message):
-    if len(message.embeds) < 1 and len(message.attachments) < 1:
+    if not utils.has_embed_or_attachment(message):
+        logging.debug(f"No embed or attachment found in message with ID {message.id}")
         return
 
     await message.add_reaction(emojis.yes_vote)
