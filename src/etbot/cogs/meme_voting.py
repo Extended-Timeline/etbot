@@ -23,6 +23,14 @@ async def vote_on_meme(message: Message):
     await message.add_reaction(emojis.ear_with_hearing_aid)
 
 
+async def delete_noise(message: Message):
+    if utils.has_embed_or_attachment(message):
+        logging.debug(f"Embed or attachment found in message with ID {message.id} in channel {message.channel.name}.")
+        return
+
+    await message.delete(delay=60 * 60)  # delete message after 1 hour
+
+
 class MemeVoting(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -34,9 +42,14 @@ class MemeVoting(commands.Cog):
             return
 
         meme_channels = [channels.get_memes(), channels.get_religious_memes()]
+        delete_noise_channels = [channels.get_out_of_context_screenshots()]
+
         # meme voting
         if message.channel in meme_channels:
             await vote_on_meme(message)
+        # delete noise
+        if message.channel in delete_noise_channels:
+            await delete_noise(message)
 
     @commands.command(name="meme", aliases=["Meme"],
                       brief="Adds the meme voting reactions to the referenced message.",
