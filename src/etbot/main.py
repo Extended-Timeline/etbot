@@ -8,8 +8,6 @@ from disnake.ext import commands
 
 from vars import channels, emojis, roles, messages
 
-logging.basicConfig(level=logging.INFO)
-
 bot = commands.Bot(command_prefix='&')
 testing = False
 
@@ -50,7 +48,7 @@ def parse_args(argv: list[str]) -> None:
     for opt, arg in opts:
         if opt == 'h':
             print("main.py -h -> Help\n"
-                  "main.py -t -> Loads the Testing Channels")
+                  "main.py -t -> Loads the Testing Channels and sets the logging level to DEBUG")
         elif opt == '-t':
             testing = True
             print("Testing...")
@@ -59,6 +57,8 @@ def parse_args(argv: list[str]) -> None:
 def main(argv: list[str] or None = None) -> None:
     if argv:
         parse_args(argv)
+
+    logging.basicConfig(level=logging.DEBUG if testing else logging.INFO)
 
     load_extensions()
 
