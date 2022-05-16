@@ -15,6 +15,10 @@ palatine: Role | None = None
 staff_roles: List[Role] = [emperor, viceroy, palatine]
 
 
+def check_is_staff(ctx: commands.Context) -> bool:
+    return any(role in ctx.author.roles for role in staff_roles)
+
+
 def initialize_testing_roles(bot: commands.Bot):
     this.senator = bot.get_guild(867738868181368852).get_role(867863600973742121)
     this.emperor = bot.get_guild(867738868181368852).get_role(942901866021408848)

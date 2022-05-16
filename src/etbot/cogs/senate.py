@@ -33,10 +33,6 @@ def check_senatorial_channels(ctx: commands.Context) -> bool:
     return ctx.message.channel in allowed_channels
 
 
-def check_is_staff(ctx: commands.Context) -> bool:
-    return any(role in ctx.author.roles for role in roles.staff_roles)
-
-
 async def find_bill(bot: commands.Bot, bill_number: int, history: list[Message] | None = None) -> Message | None:
     if history is None:
         history = await channels.get_senatorial_voting().history(limit=_history_limit).flatten()
@@ -509,7 +505,7 @@ class Senate(commands.Cog):
                       help="Voids the bill with the given number. \n"
                            "Marks the given bill as voided using the appropriate emoji "
                            "and replies to the bill informing about it being voided.")
-    @commands.check(check_is_staff)
+    @commands.check(roles.check_is_staff)
     @commands.check(check_senatorial_channels)
     async def void(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
         await ctx.message.delete()
