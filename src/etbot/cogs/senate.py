@@ -544,7 +544,7 @@ class Senate(commands.Cog):
                       help="Unvoids the bill with the given number. \n"
                            "Unmarks the given bill as voided using the appropriate emoji "
                            "and replies to the bill informing about it being unvoided.")
-    @commands.check(check_is_staff)
+    @commands.check(roles.check_is_staff)
     @commands.check(check_senatorial_channels)
     async def unvoid(self, ctx: commands.Context, bill_number: int, *, comment: str = ''):
         await ctx.message.delete()
