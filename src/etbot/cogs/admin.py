@@ -58,7 +58,7 @@ class Admin(commands.Cog):
     @commands.command(name="ip", aliases=["IP"],
                       brief="Replies with the server's IP.")
     @commands.has_guild_permissions(administrator=True)
-    async def cogs(self, ctx: commands.Context):
+    async def ip(self, ctx: commands.Context):
         ipv4: str
         ipv6: str
         ipv4 = request.urlopen('https://v4.ident.me').read().decode('utf8')
