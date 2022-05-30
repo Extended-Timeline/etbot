@@ -1,3 +1,5 @@
+from urllib import request
+
 from disnake.ext import commands
 from disnake.ext.commands import ExtensionNotFound, ExtensionAlreadyLoaded, ExtensionFailed, NoEntryPointError, \
     ExtensionNotLoaded
@@ -52,3 +54,19 @@ class Admin(commands.Cog):
             await ctx.send(e)
             return
         await ctx.send("Cog reloaded.")
+
+    @commands.command(name="ip", aliases=["IP"],
+                      brief="Replies with the server's IP.")
+    @commands.has_guild_permissions(administrator=True)
+    async def cogs(self, ctx: commands.Context):
+        ipv4: str
+        ipv6: str
+        ipv4 = request.urlopen('https://v4.ident.me').read().decode('utf8')
+        if ipv4 != "":
+            await ctx.reply(ipv4)
+            return
+        ipv6 = request.urlopen('https://v6.ident.me').read().decode('utf8')
+        if ipv6 != "":
+            await ctx.reply(ipv6)
+            return
+        await ctx.reply("Could not get IP.")
