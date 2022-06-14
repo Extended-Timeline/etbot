@@ -84,7 +84,7 @@ def delete_warning(warning: DiscordWarning) -> None:
     write_warnings()
 
 
-def get_warnings_by_user(user: User) -> list[DiscordWarning]:
+def get_warnings_by_user(user: User) -> list[DiscordWarning] | None:
     """
     Returns all warnings of a user.
     """
@@ -93,7 +93,7 @@ def get_warnings_by_user(user: User) -> list[DiscordWarning]:
     try:
         return _warnings[user.id]
     except KeyError:
-        return []
+        return None
 
 
 def get_warnings_by_moderator(moderator: User) -> list[DiscordWarning]:
