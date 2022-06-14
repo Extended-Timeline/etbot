@@ -1,17 +1,19 @@
 import datetime
 import os
 import random
+import uuid
 
 from disnake import Message, Member, User, Guild, Thread, File, NotFound
 from disnake.abc import GuildChannel
 from disnake.ext import commands
 
-from vars import channels, roles
+from vars import channels, roles, warnings
 
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Moderation(bot))
     print("Loaded Moderation Cog.")
+    # warnings.init_warnings(bot)
 
 
 async def make_message_writeable(message: Message) -> str:
@@ -172,3 +174,57 @@ class Moderation(commands.Cog):
         await channel.purge(limit=counter, before=reference)
         await channels.get_bot_log().send(f"Purged {counter} messages from {ctx.channel.name}.", file=File(filename))
         os.remove(filename)
+
+    @commands.command(name="warn")
+    @commands.check(roles.check_is_staff)
+    async def warn(self, ctx: commands.Context, user: User | Member, *, reason: str) -> None:
+        """
+        Warns a user.
+        """
+        await ctx.message.delete()
+
+        given: datetime.datetime = datetime.datetime.utcnow()
+        expires: datetime.datetime = warnings.generate_expiration(user)
+        warning: warnings.DiscordWarning = warnings.DiscordWarning(user, reason, ctx.author, given, expires)
+        warning_amount: int = warnings.add_warning(warning)
+
+        await user.send(f"You have been warned in {ctx.guild.name} for: "
+                        f"\n{reason}")
+        await channels.get_moderation_log().send(f"{user.name} has been warned for {reason}."
+                                                 f"\nWarnings: {warning_amount} {roles.palatine.mention if warning_amount >= 3 else ''}")
+
+    @commands.command(name="delWarn", aliases=["delwarn"])
+    @commands.check(roles.check_is_staff)  # TODO: Add is_not_me check
+    async def delwarn(self, ctx: commands.Context, id: str) -> None:
+        """
+        Deletes a warning.
+        """
+        await ctx.message.delete()
+        id: uuid.UUID = uuid.UUID(id)
+
+        try:
+            warnings.delete_warning(id)
+        except Exception:
+            await ctx.send(f"Warning with ID \"{id}\" not found.")
+            return
+        await ctx.send("Warning deleted.")
+
+    @commands.command(name="warnings")
+    @commands.check(roles.check_is_staff)
+    async def warnings(self, ctx: commands.Context, user: User) -> None:
+        """
+        Returns all warnings for a user
+        """
+        await ctx.message.delete()
+        user_warnings = warnings.get_warnings_by_user(user)
+
+        if not user_warnings:
+            await ctx.send(f"{user.name} has no warnings.")
+            return
+
+        warnings_message: str = f"{user.name} has {len(user_warnings)} warnings:"
+        for warning in user_warnings:
+            warnings_message += f"\n{warning}" \
+                                f"\n**--------------------------------------------------**"
+
+        await ctx.send(warnings_message)
