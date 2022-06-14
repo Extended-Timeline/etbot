@@ -90,7 +90,10 @@ def get_warnings_by_user(user: User) -> list[DiscordWarning]:
     """
     update_warnings()
 
-    return _warnings[user.id]
+    try:
+        return _warnings[user.id]
+    except KeyError:
+        return []
 
 
 def get_warnings_by_moderator(moderator: User) -> list[DiscordWarning]:
