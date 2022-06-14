@@ -1,5 +1,4 @@
 import sys
-from typing import List
 
 from disnake import Role
 from disnake.ext import commands
@@ -13,7 +12,7 @@ palatine: Role | None = None
 tribune: Role | None = None
 
 # not really safe since it could be called before any of the values are assigned
-staff_roles: List[Role] = [emperor, viceroy, palatine]
+staff_roles: list[Role] = [emperor, viceroy, palatine]
 
 
 def check_is_staff(ctx: commands.Context) -> bool:
@@ -25,7 +24,7 @@ def initialize_testing_roles(bot: commands.Bot):
     this.emperor = bot.get_guild(867738868181368852).get_role(942901866021408848)
     this.viceroy = bot.get_guild(867738868181368852).get_role(945664683615092756)
     this.palatine = bot.get_guild(867738868181368852).get_role(945664760869949490)
-    this.tribune = bot.get_guild(485360396715425792).get_role(980540267159490611)
+    this.tribune = bot.get_guild(867738868181368852).get_role(980540267159490611)
     this.staff_roles = [emperor, viceroy, palatine]
 
 
