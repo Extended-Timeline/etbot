@@ -231,3 +231,32 @@ class Moderation(commands.Cog):
                                 f"\n**--------------------------------------------------**"
 
         await ctx.send(warnings_message)
+
+    @commands.command(name="allWarnings", aliases=["allwarnings"])
+    @commands.check(roles.check_is_staff)
+    async def all_warnings(self, ctx: commands.Context) -> None:
+        """
+        Returns all warnings.
+        """
+        warnings_message: str = "All warnings:"
+        for warning in warnings.get_all_warnings():
+            warnings_message += f"\n{warning}" \
+                                f"\n**--------------------------------------------------**"
+
+        await ctx.send(warnings_message)
+
+    @commands.command(name="myWarnings", aliases=["mywarnings"])
+    def my_warnings(self, ctx: commands.Context) -> None:
+        """
+        Returns all warnings for the user.
+        """
+        user_warnings = warnings.get_warnings_by_user(ctx.author)
+
+        if not user_warnings:
+            await ctx.reply(f"{ctx.author.name} has no warnings.")
+            return
+
+        warnings_message: str = f"{ctx.author.name} has {len(user_warnings)} warnings:"
+        for warning in user_warnings:
+            warnings_message += f"\n{warning}" \
+                                f"\n**--------------------------------------------------**"

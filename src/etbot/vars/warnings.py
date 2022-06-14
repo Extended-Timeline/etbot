@@ -14,8 +14,7 @@ class DiscordWarning:
     """
 
     def __init__(self, user: User | Member, reason: str, moderator: User | Member, given: datetime.datetime,
-                 expires: datetime.datetime,
-                 id: uuid.UUID = None):
+                 expires: datetime.datetime, id: uuid.UUID = None):
         self.id = uuid.uuid4() if id is None else id
         self.user: User = user
         self.reason: str = reason
@@ -94,6 +93,34 @@ def get_warnings_by_user(user: User) -> list[DiscordWarning]:
     return _warnings[user.id]
 
 
+def get_warnings_by_moderator(moderator: User) -> list[DiscordWarning]:
+    """
+    Returns all warnings of a moderator.
+    """
+    update_warnings()
+
+    warnings: list[DiscordWarning] = []
+    for key, value in _warnings.items():
+        for warning in value:
+            if warning.moderator == moderator:
+                warnings.append(warning)
+
+    return warnings
+
+
+def get_all_warnings() -> list[DiscordWarning]:
+    """
+    Returns all warnings.
+    """
+    update_warnings()
+
+    warnings: list[DiscordWarning] = []
+    for value in _warnings.values():
+        warnings.extend(value)
+
+    return warnings
+
+
 def get_warning(id: uuid.UUID) -> DiscordWarning:
     """
     Gets a warning.
@@ -120,9 +147,9 @@ def update_warnings() -> None:
 
 async def from_json(json_data: dict, bot: commands.Bot) -> DiscordWarning:
     id: uuid.UUID = uuid.UUID(json_data["id"])
-    user: User = await bot.fetch_user(int(json_data["user"]))
+    user: User = await bot.getch_user(int(json_data["user"]))
     reason: str = json_data["reason"]
-    moderator: User = await bot.fetch_user(int(json_data["moderator"]))
+    moderator: User = await bot.getch_user(int(json_data["moderator"]))
     given: datetime.datetime = datetime.datetime.fromisoformat(json_data["given"])
     expires: datetime.datetime = datetime.datetime.fromisoformat(json_data["expires"])
 
