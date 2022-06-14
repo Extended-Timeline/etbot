@@ -215,3 +215,4 @@ fabric.properties
 ### Private Configuration ###
 token.json
 index.txt
+warnings.json
