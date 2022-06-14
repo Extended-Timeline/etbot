@@ -239,7 +239,13 @@ class Moderation(commands.Cog):
         Returns all warnings.
         """
         warnings_message: str = "All warnings:"
-        for warning in warnings.get_all_warnings():
+        warning_list: list[warnings.DiscordWarning] = warnings.get_all_warnings()
+
+        if not warning_list:
+            await ctx.send("There are no warnings.")
+            return
+
+        for warning in warning_list:
             warnings_message += f"\n{warning}" \
                                 f"\n**--------------------------------------------------**"
 
