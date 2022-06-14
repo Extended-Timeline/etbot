@@ -246,7 +246,7 @@ class Moderation(commands.Cog):
         await ctx.send(warnings_message)
 
     @commands.command(name="myWarnings", aliases=["mywarnings"])
-    def my_warnings(self, ctx: commands.Context) -> None:
+    async def my_warnings(self, ctx: commands.Context) -> None:
         """
         Returns all warnings for the user.
         """
