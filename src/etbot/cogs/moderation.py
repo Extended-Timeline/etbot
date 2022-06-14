@@ -1,12 +1,13 @@
 import datetime
 import os
 import random
+import uuid
 
 from disnake import Message, Member, User, Guild, Thread, File, NotFound
 from disnake.abc import GuildChannel
 from disnake.ext import commands
 
-from vars import channels, roles
+from vars import channels, roles, warnings
 
 
 def setup(bot: commands.Bot) -> None:
@@ -172,3 +173,90 @@ class Moderation(commands.Cog):
         await channel.purge(limit=counter, before=reference)
         await channels.get_bot_log().send(f"Purged {counter} messages from {ctx.channel.name}.", file=File(filename))
         os.remove(filename)
+
+    @commands.command(name="warn")
+    @commands.check(roles.check_is_staff)
+    async def warn(self, ctx: commands.Context, user: User | Member, *, reason: str) -> None:
+        """
+        Warns a user.
+        """
+        await ctx.message.delete()
+
+        given: datetime.datetime = datetime.datetime.utcnow()
+        expires: datetime.datetime = warnings.generate_expiration(user)
+        warning: warnings.DiscordWarning = warnings.DiscordWarning(user, reason, ctx.author, given, expires)
+        warning_amount: int = warnings.add_warning(warning)
+
+        await user.send(f"You have been warned in {ctx.guild.name} for: "
+                        f"\n{reason}")
+        await channels.get_moderation_log().send(f"{user.name} has been warned for {reason}."
+                                                 f"\nWarnings: {warning_amount} {roles.palatine.mention if warning_amount >= 3 else ''}")
+
+    @commands.command(name="delWarn", aliases=["delwarn"])
+    @commands.check(roles.check_is_staff)
+    async def delwarn(self, ctx: commands.Context, id: str) -> None:
+        """
+        Deletes a warning.
+        """
+        id: uuid.UUID = uuid.UUID(id)
+
+        try:
+            warning: warnings.DiscordWarning = warnings.get_warning(id)
+        except Exception:
+            await ctx.send(f"Warning with ID \"{id}\" not found.")
+            return
+
+        if warning.user == ctx.author:
+            await ctx.send("You cannot delete your own warning.")
+            return
+
+        warnings.delete_warning(warning)
+        await ctx.send("Warning deleted.")
+
+    @commands.command(name="warnings")
+    @commands.check(roles.check_is_staff)
+    async def warnings(self, ctx: commands.Context, user: User | Member) -> None:
+        """
+        Returns all warnings for a user
+        """
+        user_warnings = warnings.get_warnings_by_user(user)
+
+        if not user_warnings:
+            await ctx.send(f"{user.name} has no warnings.")
+            return
+
+        warnings_message: str = f"{user.name} has {len(user_warnings)} warnings:"
+        for warning in user_warnings:
+            warnings_message += f"\n{warning}" \
+                                f"\n**--------------------------------------------------**"
+
+        await ctx.send(warnings_message)
+
+    @commands.command(name="allWarnings", aliases=["allwarnings"])
+    @commands.check(roles.check_is_staff)
+    async def all_warnings(self, ctx: commands.Context) -> None:
+        """
+        Returns all warnings.
+        """
+        warnings_message: str = "All warnings:"
+        for warning in warnings.get_all_warnings():
+            warnings_message += f"\n{warning}" \
+                                f"\n**--------------------------------------------------**"
+
+        await ctx.send(warnings_message)
+
+    @commands.command(name="myWarnings", aliases=["mywarnings"])
+    async def my_warnings(self, ctx: commands.Context) -> None:
+        """
+        Returns all warnings for the user.
+        """
+        user_warnings = warnings.get_warnings_by_user(ctx.author)
+
+        if not user_warnings:
+            await ctx.reply(f"{ctx.author.name} has no warnings.")
+            return
+
+        warnings_message: str = f"{ctx.author.name} has {len(user_warnings)} warnings:"
+        for warning in user_warnings:
+            warnings_message += f"\n{warning}" \
+                                f"\n**--------------------------------------------------**"
