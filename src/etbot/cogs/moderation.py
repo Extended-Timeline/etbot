@@ -246,7 +246,7 @@ class Moderation(commands.Cog):
         await ctx.send(warnings_message)
 
     @commands.command(name="myWarnings", aliases=["mywarnings"])
-    async def my_warnings(self, ctx: commands.Context) -> None:
+    async def my_warnings(self, ctx: commands.Context) -> None:  # TODO restrict to bot channel(s)
         """
         Returns all warnings for the user.
         """
@@ -260,3 +260,5 @@ class Moderation(commands.Cog):
         for warning in user_warnings:
             warnings_message += f"\n{warning}" \
                                 f"\n**--------------------------------------------------**"
+
+        await ctx.reply(warnings_message)
