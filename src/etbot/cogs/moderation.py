@@ -13,7 +13,6 @@ from vars import channels, roles, warnings
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Moderation(bot))
     print("Loaded Moderation Cog.")
-    # warnings.init_warnings(bot)
 
 
 async def make_message_writeable(message: Message) -> str:
@@ -194,28 +193,32 @@ class Moderation(commands.Cog):
                                                  f"\nWarnings: {warning_amount} {roles.palatine.mention if warning_amount >= 3 else ''}")
 
     @commands.command(name="delWarn", aliases=["delwarn"])
-    @commands.check(roles.check_is_staff)  # TODO: Add is_not_me check
+    @commands.check(roles.check_is_staff)
     async def delwarn(self, ctx: commands.Context, id: str) -> None:
         """
         Deletes a warning.
         """
-        await ctx.message.delete()
         id: uuid.UUID = uuid.UUID(id)
 
         try:
-            warnings.delete_warning(id)
+            warning: warnings.DiscordWarning = warnings.get_warning(id)
         except Exception:
             await ctx.send(f"Warning with ID \"{id}\" not found.")
             return
+
+        if warning.user == ctx.author:
+            await ctx.send("You cannot delete your own warning.")
+            return
+
+        warnings.delete_warning(warning)
         await ctx.send("Warning deleted.")
 
     @commands.command(name="warnings")
     @commands.check(roles.check_is_staff)
-    async def warnings(self, ctx: commands.Context, user: User) -> None:
+    async def warnings(self, ctx: commands.Context, user: User | Member) -> None:
         """
         Returns all warnings for a user
         """
-        await ctx.message.delete()
         user_warnings = warnings.get_warnings_by_user(user)
 
         if not user_warnings:

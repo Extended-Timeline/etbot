@@ -6,7 +6,7 @@ import sys
 
 from disnake.ext import commands
 
-from vars import channels, emojis, roles, messages
+from vars import channels, emojis, roles, messages, warnings
 
 bot = commands.Bot(command_prefix='&')
 testing = False
@@ -26,6 +26,8 @@ async def on_ready() -> None:
         emojis.initialize_emojis(bot)
         roles.initialize_roles(bot)
         messages.initialize_messages()
+
+    await warnings.init_warnings(bot)
 
     print(f"Anwesend {bot.user.name}")
 

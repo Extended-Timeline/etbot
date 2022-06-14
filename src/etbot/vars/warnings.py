@@ -2,7 +2,7 @@ import datetime
 import json
 import uuid
 
-from disnake import User
+from disnake import User, Member
 from disnake.ext import commands
 
 _warnings: dict = {}
@@ -13,7 +13,8 @@ class DiscordWarning:
     A warning.
     """
 
-    def __init__(self, user: User, reason: str, moderator: User, given: datetime.datetime, expires: datetime.datetime,
+    def __init__(self, user: User | Member, reason: str, moderator: User | Member, given: datetime.datetime,
+                 expires: datetime.datetime,
                  id: uuid.UUID = None):
         self.id = uuid.uuid4() if id is None else id
         self.user: User = user
@@ -25,6 +26,7 @@ class DiscordWarning:
     def __str__(self):
         return f"ID: **{self.id}**" \
                f"\nUser: **{self.user.name}**" \
+               f"\nExpires: **{self.expires.strftime('%Y-%m-%d %H:%M')}**" \
                f"\n{self.reason} - {self.given.strftime('%Y-%m-%d %H:%M')}"
 
     def to_json(self) -> dict:
@@ -70,19 +72,15 @@ def add_warning(warning: DiscordWarning) -> int:
     """
     Adds a warning. Returns the number of warnings of the user.
     """
-    update_warnings()
-
     _warnings[warning.user.id].append(warning)
     write_warnings()
     return len(_warnings[warning.user.id])
 
 
-def delete_warning(id: uuid.UUID) -> None:
+def delete_warning(warning: DiscordWarning) -> None:
     """
     Removes a warning.
     """
-    warning = get_warning(id)
-
     _warnings[warning.user.id].remove(warning)
     write_warnings()
 
@@ -103,7 +101,6 @@ def get_warning(id: uuid.UUID) -> DiscordWarning:
     update_warnings()
 
     for key, value in _warnings.items():
-        print(key)
         for warning in value:
             if warning.id == id:
                 return warning
@@ -121,13 +118,13 @@ def update_warnings() -> None:
                 _warnings[key].remove(warning)
 
 
-def from_json(json_data: dict, bot: commands.Bot) -> DiscordWarning:
-    id = uuid.UUID(json_data["id"])
-    user = bot.get_user(json_data["user"])
-    reason = json_data["reason"]
-    moderator = bot.get_user(json_data["moderator"])
-    given = datetime.datetime.fromisoformat(json_data["given"])
-    expires = datetime.datetime.fromisoformat(json_data["expires"])
+async def from_json(json_data: dict, bot: commands.Bot) -> DiscordWarning:
+    id: uuid.UUID = uuid.UUID(json_data["id"])
+    user: User = await bot.fetch_user(int(json_data["user"]))
+    reason: str = json_data["reason"]
+    moderator: User = await bot.fetch_user(int(json_data["moderator"]))
+    given: datetime.datetime = datetime.datetime.fromisoformat(json_data["given"])
+    expires: datetime.datetime = datetime.datetime.fromisoformat(json_data["expires"])
 
     return DiscordWarning(user, reason, moderator, given, expires, id)
 
@@ -146,7 +143,7 @@ def write_warnings() -> None:
         json.dump(warnings_json, file, indent=4)
 
 
-def init_warnings(bot: commands.Bot) -> None:
+async def init_warnings(bot: commands.Bot) -> None:
     """
     Reads the warnings from the file.
     """
@@ -155,6 +152,7 @@ def init_warnings(bot: commands.Bot) -> None:
     global _warnings
 
     for key, value in warnings_json.items():
-        _warnings[key] = []
+        _warnings[int(key)] = []
         for warning_json in value:
-            _warnings[key].append(from_json(warning_json, bot))
+            warning: DiscordWarning = await from_json(warning_json, bot)
+            _warnings[int(key)].append(warning)
