@@ -372,7 +372,7 @@ class Senate(commands.Cog):
 
         content: list[str] = bill.content.split(' ')
         await bill.reply(f"Bill {bill_number} passes."
-                         f"\n{comment}{content[len(content) - 2]}")
+                         f"\n{comment}{content[len(content) - 3]}")
 
         # clean changes
         wording: str = ''
@@ -420,7 +420,7 @@ class Senate(commands.Cog):
 
         content: list[str] = bill.content.split(' ')
         await bill.reply(f"Bill {bill_number} does not pass."
-                         f"\n{comment}{content[len(content) - 2]}")
+                         f"\n{comment}{content[len(content) - 3]}")
 
     @commands.command(name="veto", aliases=["Veto"],
                       brief="Vetoes the bill with the given number.",
@@ -459,7 +459,7 @@ class Senate(commands.Cog):
 
         content: list[str] = bill.content.split(' ')
         await bill.reply(f"Bill {bill_number} is vetoed."
-                         f"\r\n{comment}{content[len(content) - 2]}")
+                         f"\r\n{comment}{content[len(content) - 3]}")
 
     @commands.command(name="forcethrough", aliases=["Forcethrough"],
                       brief="Forces the bill with the given number through.",
@@ -498,7 +498,7 @@ class Senate(commands.Cog):
 
         content: list[str] = bill.content.split(' ')
         await bill.reply(f"Bill {bill_number} is forced through."
-                         f"\r\n{comment}{content[len(content) - 2]}")
+                         f"\r\n{comment}{content[len(content) - 3]}")
 
     @commands.command(name="void", aliases=["Void"],
                       brief="Voids the bill with the given number.",
@@ -537,7 +537,7 @@ class Senate(commands.Cog):
 
         content: list[str] = bill.content.split(' ')
         await bill.reply(f"Bill {bill_number} is void."
-                         f"\r\n{comment} {content[len(content) - 2]}")
+                         f"\r\n{comment} {content[len(content) - 3]}")
 
     @commands.command(name="unvoid", aliases=["Unvoid"],
                       brief="Unvoids the bill with the given number.",
@@ -576,7 +576,7 @@ class Senate(commands.Cog):
 
         content: list[str] = bill.content.split(' ')
         await bill.reply(f"Bill {bill_number} is unvoided."
-                         f"\r\n{comment} {content[len(content) - 2]}")
+                         f"\r\n{comment} {content[len(content) - 3]}")
 
     @commands.command(name="withdraw", aliases=["Withdraw"],
                       brief="Withdraws the bill with the given number.",
@@ -611,7 +611,7 @@ class Senate(commands.Cog):
             return
 
         content: list[str] | None = bill.content.split(' ')
-        bill_author: str | None = content[len(content) - 2]
+        bill_author: str | None = content[len(content) - 3]
         # error message
         if author != bill_author:
             await ctx.channel.send(f"This is not your Bill. {author}"
@@ -622,4 +622,4 @@ class Senate(commands.Cog):
 
         content: list[str] = bill.content.split(' ')
         await bill.reply(f"Bill {bill_number} is withdrawn."
-                         f"\r\n{comment}{content[len(content) - 2]}")
+                         f"\r\n{comment}{content[len(content) - 3]}")
