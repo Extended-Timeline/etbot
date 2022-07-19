@@ -207,6 +207,16 @@ class Senate(commands.Cog):
         # variable set up
         author: str = ctx.author.mention
 
+        # option amount check
+        if options < 2:
+            await ctx.message.channel.send(f"Too few options given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+        if options > 10:
+            await ctx.message.channel.send(f"Too many options given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+
         index.increment_index()
         text: str = assemble_bill(text, index.get_index(), author)
 
@@ -230,6 +240,16 @@ class Senate(commands.Cog):
 
         # variable set up
         author: str = ctx.author.mention
+
+        # option amount check
+        if options < 2:
+            await ctx.message.channel.send(f"Too few options given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
+        if options > 10:
+            await ctx.message.channel.send(f"Too many options given. {author}"
+                                           f"\r\n```{ctx.message.clean_content}```")
+            return
 
         # check that bill_number is valid
         if bill_number > index.get_index():
